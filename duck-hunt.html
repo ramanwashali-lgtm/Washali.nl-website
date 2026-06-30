@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duck Hunt</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    overflow: hidden;
+  }
+  h1 {
+    font-size: 2.5rem;
+    color: #f5a623;
+    text-shadow: 0 0 20px #f5a623;
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .subtitle { color: #aaa; letter-spacing: 3px; font-size: 0.8rem; margin-bottom: 20px; }
+  .hud { display: flex; gap: 40px; margin-bottom: 16px; }
+  .hud-box {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 8px;
+    padding: 8px 24px;
+    text-align: center;
+  }
+  .hud-label { font-size: 0.65rem; color: #aaa; letter-spacing: 2px; }
+  .hud-value { font-size: 1.4rem; color: #f5a623; font-weight: bold; }
+  #gameCanvas {
+    border: 2px solid rgba(245,166,35,0.4);
+    border-radius: 12px;
+    cursor: crosshair;
+    display: block;
+    box-shadow: 0 0 40px rgba(245,166,35,0.15);
+  }
+  .ammo-bar { display: flex; gap: 8px; margin-top: 14px; }
+  .bullet { width: 14px; height: 24px; background: #f5a623; border-radius: 7px 7px 3px 3px; transition: background 0.2s; }
+  .bullet.used { background: #333; }
+  .controls { margin-top: 14px; font-size: 0.7rem; color: #666; letter-spacing: 1px; }
+  #startScreen, #gameOverScreen {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10,14,31,0.96);
+    border: 2px solid #f5a623;
+    border-radius: 16px;
+    padding: 40px 60px;
+    text-align: center;
+    z-index: 10;
+    box-shadow: 0 0 60px rgba(245,166,35,0.2);
+  }
+  #startScreen h2, #gameOverScreen h2 { font-size: 1.8rem; color: #f5a623; margin-bottom: 12px; letter-spacing: 4px; }
+  #startScreen p, #gameOverScreen p { color: #aaa; margin-bottom: 24px; line-height: 1.8; font-size: 0.85rem; }
+  .btn {
+    background: #f5a623; color: #1a1a2e; border: none;
+    padding: 12px 36px; border-radius: 8px;
+    font-size: 1rem; font-family: 'Courier New', monospace;
+    font-weight: bold; cursor: pointer; letter-spacing: 2px; transition: all 0.2s;
+  }
+  .btn:hover { background: #ffc554; transform: scale(1.05); }
+  .nav-home {
+    position: fixed; top: 20px; left: 20px;
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.4);
+    color: #f5a623; padding: 8px 16px;
+    border-radius: 8px; text-decoration: none;
+    font-size: 0.8rem; letter-spacing: 1px; transition: all 0.2s;
+  }
+  .nav-home:hover { background: rgba(245,166,35,0.3); }
+  .wrapper { position: relative; }
+</style>
+</head>
+<body>
+<a href="index.html" class="nav-home">&#8592; Games Hub</a>
+<h1>Duck Hunt</h1>
+<p class="subtitle">AIM &middot; SHOOT &middot; SCORE</p>
+<div class="hud">
+  <div class="hud-box"><div class="hud-label">SCORE</div><div class="hud-value" id="scoreDisplay">0</div></div>
+  <div class="hud-box"><div class="hud-label">ROUND</div><div class="hud-value" id="roundDisplay">1</div></div>
+  <div class="hud-box"><div class="hud-label">HITS</div><div class="hud-value" id="hitsDisplay">0 / 0</div></div>
+</div>
+<div class="wrapper">
+  <canvas id="gameCanvas" width="640" height="400"></canvas>
+  <div id="startScreen">
+    <h2>DUCK HUNT</h2>
+    <p>Click ducks before they fly away!<br>You have 3 bullets per duck.<br>Hit 6 out of 10 to advance.</p>
+    <button class="btn" id="startBtn">START GAME</button>
+  </div>
+  <div id="gameOverScreen" style="display:none;">
+    <h2 id="gameOverTitle">GAME OVER</h2>
+    <p id="gameOverMsg">Score: 0</p>
+    <button class="btn" id="restartBtn">PLAY AGAIN</button>
+  </div>
+</div>
+<div class="ammo-bar" id="ammoBar">
+  <div class="bullet" id="b1"></div>
+  <div class="bullet" id="b2"></div>
+  <div class="bullet" id="b3"></div>
+</div>
+<div class="controls">CLICK to shoot &bull; Hit ducks before they escape</div>
+<script>
+const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
+let score=0,round=1,hits=0,ducksShown=0,bullets=3,currentDuck=null,gameState='idle',animId,bang=null,miss=null;
+const DUCK_COLORS=['#4ecdc4','#ff6b6b','#95e1d3','#f8b500','#a8e6cf'];
+class Duck{
+  constructor(r){
+    const sp=1.8+r*0.3;
+    this.x=Math.random()<0.5?-40:canvas.width+40;
+    this.y=canvas.height-80-Math.random()*(canvas.height-180);
+    this.vx=(this.x<0?1:-1)*(sp+Math.random()*1.2);
+    this.vy=-(0.8+Math.random()*1.2);
+    this.color=DUCK_COLORS[Math.floor(Math.random()*DUCK_COLORS.length)];
+    this.size=32;this.alive=true;this.escaping=false;this.escapeTimer=0;
+    this.deathTimer=0;this.isDead=false;this.wingUp=true;this.wingTimer=0;this.bobTimer=0;
+  }
+  update(){
+    if(this.isDead){this.deathTimer++;this.y+=4;return;}
+    this.wingTimer++;if(this.wingTimer>10){this.wingUp=!this.wingUp;this.wingTimer=0;}
+    this.bobTimer++;this.x+=this.vx;this.y+=this.vy+Math.sin(this.bobTimer*0.08)*0.6;
+    if(this.x<20||this.x>canvas.width-20)this.vx*=-1;
+    if(this.y<30)this.vy=Math.abs(this.vy);
+    if(this.y>canvas.height-60){this.escaping=true;this.vy=-3.5;}
+    if(this.escaping){this.escapeTimer++;if(this.y<-60)this.alive=false;}
+  }
+  draw(){
+    ctx.save();ctx.translate(this.x,this.y);
+    if(this.vx<0)ctx.scale(-1,1);
+    if(this.isDead){ctx.save();ctx.rotate(Math.PI/2);this._body();ctx.restore();}
+    else this._body();
+    ctx.restore();
+  }
+  _body(){
+    const s=this.size;
+    ctx.fillStyle=this.color;
+    ctx.beginPath();ctx.ellipse(0,0,s*0.6,s*0.4,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=this.color+'cc';
+    ctx.beginPath();
+    if(this.wingUp)ctx.ellipse(-4,-s*0.35,s*0.5,s*0.2,-0.4,0,Math.PI*2);
+    else ctx.ellipse(-4,s*0.15,s*0.5,s*0.2,0.4,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle='#2d6a4f';ctx.beginPath();ctx.arc(s*0.55,-s*0.15,s*0.25,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s*0.63,-s*0.2,s*0.07,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(s*0.64,-s*0.2,s*0.035,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f5a623';
+    ctx.beginPath();ctx.moveTo(s*0.78,-s*0.12);ctx.lineTo(s*0.95,-s*0.08);ctx.lineTo(s*0.78,-s*0.04);ctx.closePath();ctx.fill();
+  }
+  hit(mx,my){const dx=mx-this.x,dy=my-this.y;return dx*dx+dy*dy<(this.size*0.8)*(this.size*0.8);}
+}
+function drawBg(){
+  const g=ctx.createLinearGradient(0,0,0,canvas.height);
+  g.addColorStop(0,'#1a1a4e');g.addColorStop(0.7,'#1a3a5c');g.addColorStop(1,'#2d5a27');
+  ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='rgba(255,255,255,0.06)';
+  [[80,60,70,28],[250,40,90,24],[450,80,65,22],[580,50,80,26]].forEach(([x,y,w,h])=>{
+    ctx.beginPath();ctx.ellipse(x,y,w,h,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(x-30,y+10,w*0.6,h*0.7,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(x+30,y+8,w*0.65,h*0.7,0,0,Math.PI*2);ctx.fill();
+  });
+  ctx.fillStyle='#2d5a27';ctx.fillRect(0,canvas.height-50,canvas.width,50);
+  ctx.fillStyle='#3a7a34';
+  for(let i=0;i<canvas.width;i+=18){ctx.beginPath();ctx.moveTo(i,canvas.height-50);ctx.lineTo(i+6,canvas.height-64);ctx.lineTo(i+12,canvas.height-50);ctx.fill();}
+  ctx.fillStyle='#3a7a34';
+  [[100,canvas.height-52,50,18],[320,canvas.height-52,60,20],[520,canvas.height-52,45,16]].forEach(([x,y,w,h])=>{ctx.beginPath();ctx.ellipse(x,y,w,h,0,0,Math.PI*2);ctx.fill();});
+}
+function drawBang(){
+  if(!bang)return;bang.timer--;
+  ctx.save();ctx.globalAlpha=bang.timer/20;ctx.font='bold 28px Courier New';ctx.fillStyle='#f5a623';
+  ctx.textAlign='center';ctx.fillText('BANG!',bang.x,bang.y);ctx.restore();
+  if(bang.timer<=0)bang=null;
+}
+function drawMiss(){
+  if(!miss)return;miss.timer--;
+  ctx.save();ctx.globalAlpha=miss.timer/30;ctx.font='bold 22px Courier New';ctx.fillStyle='#ff6b6b';
+  ctx.textAlign='center';ctx.fillText('MISS!',miss.x,miss.y);ctx.restore();
+  if(miss.timer<=0)miss=null;
+}
+function updateHUD(){
+  document.getElementById('scoreDisplay').textContent=score;
+  document.getElementById('roundDisplay').textContent=round;
+  document.getElementById('hitsDisplay').textContent=hits+' / '+ducksShown;
+  for(let i=1;i<=3;i++)document.getElementById('b'+i).className='bullet'+(i<=bullets?'':' used');
+}
+function spawnDuck(){if(ducksShown>=10)return;currentDuck=new Duck(round);ducksShown++;bullets=3;updateHUD();}
+function checkEnd(){
+  if(ducksShown>=10&&!currentDuck){
+    if(hits>=6){round++;hits=0;ducksShown=0;setTimeout(()=>spawnDuck(),800);}
+    else endGame();
+  }
+}
+function endGame(){
+  gameState='over';cancelAnimationFrame(animId);
+  document.getElementById('gameOverTitle').textContent=hits>=6?'YOU WIN!':'GAME OVER';
+  document.getElementById('gameOverMsg').textContent='Score: '+score+'  Round: '+round;
+  document.getElementById('gameOverScreen').style.display='block';
+}
+function loop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);drawBg();
+  if(currentDuck){
+    currentDuck.update();currentDuck.draw();
+    if(currentDuck.isDead){if(currentDuck.deathTimer>60){currentDuck=null;setTimeout(()=>{spawnDuck();checkEnd();},400);}}
+    else if(!currentDuck.alive){currentDuck=null;setTimeout(()=>{spawnDuck();checkEnd();},400);}
+    else if(bullets<=0&&!currentDuck.isDead&&!currentDuck.escaping){currentDuck.escaping=true;currentDuck.vy=-4;}
+  }
+  drawBang();drawMiss();updateHUD();
+  animId=requestAnimationFrame(loop);
+}
+function startGame(){
+  score=0;round=1;hits=0;ducksShown=0;currentDuck=null;bullets=3;bang=null;miss=null;
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('gameOverScreen').style.display='none';
+  gameState='playing';updateHUD();spawnDuck();loop();
+}
+canvas.addEventListener('click',function(e){
+  if(gameState!=='playing'||bullets<=0)return;
+  const r=canvas.getBoundingClientRect();
+  const mx=(e.clientX-r.left)*(canvas.width/r.width),my=(e.clientY-r.top)*(canvas.height/r.height);
+  bullets--;updateHUD();
+  if(currentDuck&&!currentDuck.isDead&&currentDuck.hit(mx,my)){
+    currentDuck.isDead=true;currentDuck.deathTimer=0;hits++;score+=100*round;bang={x:mx,y:my,timer:20};
+  }else miss={x:mx,y:my,timer:30};
+});
+document.getElementById('startBtn').addEventListener('click',startGame);
+document.getElementById('restartBtn').addEventListener('click',startGame);
+</script>
+</body>
+</html>
