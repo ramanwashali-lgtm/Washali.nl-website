@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #ffffff;
@@ -80,6 +81,8 @@
   .btn-ghost { background: var(--bg-soft); color: var(--text); }
   .btn-ghost:hover { background: #e8e8ed; }
   .btn-lg { padding: 15px 32px; font-size: 1.02rem; }
+  .link-btn { background: none; border: none; color: var(--accent); font-size: .88rem; font-weight: 500; }
+  .link-btn:hover { text-decoration: underline; }
 
   .avatar-chip {
     display: flex; align-items: center; gap: 8px;
@@ -321,6 +324,8 @@
     border-radius: 980px; font-size: .85rem; font-weight: 600;
   }
 
+  .auth-note { text-align: center; margin-top: 16px; color: var(--muted); font-size: .88rem; }
+
   /* toast */
   #toast {
     position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(120px);
@@ -329,6 +334,7 @@
     font-size: .9rem; font-weight: 500; z-index: 200;
     box-shadow: var(--shadow-md); transition: transform .3s ease;
     display: flex; align-items: center; gap: 10px;
+    max-width: 90vw; text-align: center;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -346,12 +352,10 @@
     <a href="#how">How it works</a>
     <a href="#discover">Discover</a>
     <a href="#random">Surprise me</a>
+    <a href="#contact">Contact</a>
   </div>
-  <div class="nav-actions">
-    <button class="avatar-chip" id="profileBtn" onclick="openProfile()">
-      <span class="em" id="navAvatar">🙂</span><span id="navName">Set up profile</span>
-    </button>
-    <button class="btn btn-primary" onclick="openCreate()"><span>+ Post<span class="post-label-long"> a hangout</span></span></button>
+  <div class="nav-actions" id="navActions">
+    <!-- filled by renderNav() -->
   </div>
 </nav>
 
@@ -365,9 +369,9 @@
     <button class="btn btn-ghost btn-lg" onclick="surpriseMe()">Surprise me</button>
   </div>
   <div class="hero-stats">
-    <div class="stat"><b id="statHangouts">0</b>open hangouts</div>
-    <div class="stat"><b id="statPeople">0</b>people in</div>
-    <div class="stat"><b id="statToday">0</b>happening today</div>
+    <div class="stat"><b id="statHangouts">–</b>open hangouts</div>
+    <div class="stat"><b id="statPeople">–</b>people in</div>
+    <div class="stat"><b id="statToday">–</b>happening today</div>
   </div>
 </header>
 
@@ -403,7 +407,7 @@
   <div class="container">
     <div class="section-head reveal">
       <h2>Happening around town</h2>
-      <p>Sorted by how well each plan matches your interests. Set up your profile to get better matches.</p>
+      <p>Sorted by how well each plan matches your interests. Create an account to post and join.</p>
     </div>
 
     <div class="discover-bar">
@@ -429,7 +433,7 @@
     </div>
 
     <div class="cat-chips" id="catChips"></div>
-    <div class="cards" id="cards"></div>
+    <div class="cards" id="cards"><div class="empty" style="grid-column:1/-1"><p>Loading hangouts…</p></div></div>
   </div>
 </section>
 
@@ -446,12 +450,61 @@
   </div>
 </section>
 
+<!-- CONTACT -->
+<section id="contact" class="section-soft">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2>Get in touch</h2>
+      <p>Questions, ideas, or something not working? Send us a message — we read everything.</p>
+    </div>
+    <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:34px" class="reveal">
+      <div class="field-row">
+        <div class="field">
+          <label>Your name</label>
+          <input id="ctName" type="text" maxlength="48" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label>Your email</label>
+          <input id="ctEmail" type="email" maxlength="80" placeholder="you@example.com">
+        </div>
+      </div>
+      <div class="field">
+        <label>Message</label>
+        <textarea id="ctMsg" maxlength="1000" placeholder="What's on your mind?"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" id="ctSubmit" onclick="sendContact()">Send message</button>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div><b>Spontano</b> — meet your city.</div>
-  <div>Made for people who say "yes" · <span id="year"></span></div>
+  <div>Made for people who say "yes" · <a href="#contact" style="color:var(--muted)">Contact</a> · <span id="year"></span></div>
 </footer>
 
 <!-- ===== MODALS ===== -->
+
+<!-- Auth modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <h2 id="authTitle">Sign in</h2>
+      <button class="close-x" onclick="closeModal('authModal')">✕</button>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="authPass" type="password" placeholder="At least 6 characters" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" id="authSubmit" onclick="submitAuth()">Sign in</button>
+    <div class="auth-note" id="authToggleNote">
+      New here? <button class="link-btn" onclick="setAuthMode('signup')">Create an account</button>
+    </div>
+  </div>
+</div>
 
 <!-- Profile modal -->
 <div class="modal-overlay" id="profileModal">
@@ -473,6 +526,7 @@
       <div class="interest-grid" id="pfInterests"></div>
     </div>
     <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="saveProfile()">Save profile</button>
+    <div class="auth-note"><button class="link-btn" onclick="signOut()">Sign out</button></div>
   </div>
 </div>
 
@@ -518,7 +572,7 @@
         <input id="crWhere" type="text" maxlength="48" placeholder="e.g. Central Station, main hall">
       </div>
     </div>
-    <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="createHangout()">Post it</button>
+    <button class="btn btn-primary" style="width:100%; justify-content:center" id="crSubmit" onclick="createHangout()">Post it</button>
   </div>
 </div>
 
@@ -541,7 +595,12 @@
 <div id="toast"></div>
 
 <script>
-/* ============ data ============ */
+/* ============ Supabase setup ============ */
+const SUPABASE_URL = 'https://rxrdwsxzhbzwoponqbwk.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_zJlZniE0RdHhm6brgX-xLQ_1F1IJcgS';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ============ static data ============ */
 const CATS = [
   { id: 'coffee',  name: 'Coffee & chat', emoji: '☕' },
   { id: 'food',    name: 'Food & drinks', emoji: '🍜' },
@@ -554,45 +613,25 @@ const CATS = [
 ];
 const AVATARS = ['🦊','🐼','🦁','🐸','🐙','🦉','🐧','🦄','🐯','🐨','🦋','🐳'];
 
-const LS_KEY = 'spontano_v1';
-
-function hoursFromNow(h) { const d = new Date(Date.now() + h * 3600e3); return d.toISOString(); }
-
-function seedHangouts() {
-  return [
-    { id: 'h1', title: 'Sunset walk & good talks', desc: 'Easy-pace walk along the water, ending with a drink somewhere. Zero small talk pressure — deep chats welcome.', cat: 'outdoor', emoji: '🌇', when: hoursFromNow(5), where: 'Old harbor bridge', spots: 4, host: { name: 'Mila', avatar: '🦊' }, joined: [{ name: 'Tom', avatar: '🐸' }], msgs: [{ who: 'Mila', text: 'Bringing my dog, hope that\'s okay 🐕' }] },
-    { id: 'h2', title: 'Board game night — beginners welcome', desc: 'Catan, Codenames and whatever the café has. Losing gracefully is mandatory.', cat: 'games', emoji: '🎲', when: hoursFromNow(28), where: 'Dice & Beans café', spots: 6, host: { name: 'Jonas', avatar: '🦉' }, joined: [{ name: 'Ana', avatar: '🦄' }, { name: 'Rik', avatar: '🐼' }], msgs: [{ who: 'Ana', text: 'I always lose at Catan. Coming anyway.' }] },
-    { id: 'h3', title: 'Morning run, slow pace 5k', desc: 'Conversational pace, nobody gets dropped. Coffee after is the real goal.', cat: 'sport', emoji: '🏃', when: hoursFromNow(14), where: 'City park, east gate', spots: 10, host: { name: 'Sara', avatar: '🐯' }, joined: [], msgs: [] },
-    { id: 'h4', title: 'Try that new ramen place', desc: 'It has a queue every night so it must be good. Let\'s find out together.', cat: 'food', emoji: '🍜', when: hoursFromNow(8), where: 'Noodle St. 12', spots: 3, host: { name: 'Kenji', avatar: '🐙' }, joined: [{ name: 'Lea', avatar: '🐨' }], msgs: [] },
-    { id: 'h5', title: 'Gallery hop + cheap wine after', desc: 'Three small galleries in one street, then debrief over a glass. Opinions on art: optional but encouraged.', cat: 'culture', emoji: '🎨', when: hoursFromNow(50), where: 'Arts quarter, corner café', spots: 5, host: { name: 'Nora', avatar: '🦋' }, joined: [], msgs: [] },
-    { id: 'h6', title: 'Coffee for new-in-town people', desc: 'Just moved here? Same. Let\'s trade survival tips and favorite spots.', cat: 'coffee', emoji: '☕', when: hoursFromNow(3), where: 'Brew Lab, window table', spots: 4, host: { name: 'Deniz', avatar: '🐧' }, joined: [{ name: 'Ivo', avatar: '🦁' }, { name: 'May', avatar: '🐳' }], msgs: [{ who: 'Deniz', text: 'I\'ll be the one with the yellow scarf' }] },
-    { id: 'h7', title: 'Mystery bus stop adventure', desc: 'We take the first bus that arrives and get off at stop #7. Whatever is there, that\'s the plan.', cat: 'random', emoji: '🌀', when: hoursFromNow(26), where: 'Central station, stop B', spots: 4, host: { name: 'Felix', avatar: '🐼' }, joined: [], msgs: [] },
-    { id: 'h8', title: 'Vinyl digging + listening session', desc: 'Record store crawl, everyone picks one album under €10, we listen at mine after.', cat: 'music', emoji: '🎶', when: hoursFromNow(75), where: 'Spin City Records', spots: 4, host: { name: 'Roos', avatar: '🦄' }, joined: [{ name: 'Ben', avatar: '🦉' }], msgs: [] },
-  ];
-}
-
-let state = load();
-function load() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-  return { profile: null, hangouts: seedHangouts(), joinedIds: [] };
-}
-function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-
+/* ============ app state ============ */
+let session = null;      // Supabase auth session
+let myProfile = null;    // my row in profiles
+let hangouts = [];       // loaded hangouts with host + attendees
 let activeCat = 'all';
 let selAvatar = AVATARS[0];
 let selInterests = [];
+let authMode = 'signin';
+let chatTimer = null;
+let afterAuthAction = null;
 
 /* ============ helpers ============ */
 const $ = id => document.getElementById(id);
-function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function catOf(id) { return CATS.find(c => c.id === id) || CATS[CATS.length - 1]; }
-function me() { return state.profile; }
-function isJoined(h) { return state.joinedIds.includes(h.id); }
-function isMine(h) { return me() && h.host.name === me().name && h.host.avatar === me().avatar; }
-function peopleIn(h) { return 1 + h.joined.length; }
+function uid() { return session ? session.user.id : null; }
+function isJoined(h) { return uid() && h.attendees.some(a => a.user_id === uid()); }
+function isMine(h) { return uid() && h.host_id === uid(); }
+function peopleIn(h) { return 1 + h.attendees.length; }
 function spotsLeft(h) { return h.spots >= 999 ? Infinity : h.spots - peopleIn(h); }
 
 function fmtWhen(iso) {
@@ -615,9 +654,10 @@ function dayBucket(iso) {
 }
 
 function matchScore(h) {
-  if (!me() || !me().interests.length) return null;
-  let score = me().interests.includes(h.cat) ? 92 : 45;
-  score += (h.id.charCodeAt(1) * 7) % 8; // stable per-hangout variation
+  if (!myProfile || !myProfile.interests || !myProfile.interests.length) return null;
+  let score = myProfile.interests.includes(h.category) ? 92 : 45;
+  const hash = [...h.id].reduce((a, c) => a + c.charCodeAt(0), 0);
+  score += (hash * 7) % 8;
   return Math.min(99, score);
 }
 
@@ -626,26 +666,156 @@ function toast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._tm);
-  t._tm = setTimeout(() => t.classList.remove('show'), 2600);
+  t._tm = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
 function openModal(id) { $(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeModal(id) { $(id).classList.remove('open'); document.body.style.overflow = ''; }
+function closeModal(id) {
+  $(id).classList.remove('open'); document.body.style.overflow = '';
+  if (id === 'detailModal' && chatTimer) { clearInterval(chatTimer); chatTimer = null; }
+}
 document.querySelectorAll('.modal-overlay').forEach(ov => {
   ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); });
 });
 
+/* ============ auth ============ */
+function setAuthMode(mode) {
+  authMode = mode;
+  $('authTitle').textContent = mode === 'signup' ? 'Create your account' : 'Sign in';
+  $('authSubmit').textContent = mode === 'signup' ? 'Create account' : 'Sign in';
+  $('authToggleNote').innerHTML = mode === 'signup'
+    ? `Already have an account? <button class="link-btn" onclick="setAuthMode('signin')">Sign in</button>`
+    : `New here? <button class="link-btn" onclick="setAuthMode('signup')">Create an account</button>`;
+}
+function openAuth(mode) { setAuthMode(mode || 'signin'); openModal('authModal'); }
+
+async function submitAuth() {
+  const email = $('authEmail').value.trim();
+  const pass = $('authPass').value;
+  if (!email || !email.includes('@')) { toast('Enter a valid email address'); return; }
+  if (pass.length < 6) { toast('Password needs at least 6 characters'); return; }
+  $('authSubmit').disabled = true;
+  try {
+    let res;
+    if (authMode === 'signup') {
+      res = await db.auth.signUp({ email, password: pass });
+      if (!res.error && !res.data.session) {
+        toast('Check your email to confirm your account, then sign in.');
+        setAuthMode('signin');
+        return;
+      }
+    } else {
+      res = await db.auth.signInWithPassword({ email, password: pass });
+    }
+    if (res.error) { toast(res.error.message); return; }
+    closeModal('authModal');
+    $('authPass').value = '';
+  } finally {
+    $('authSubmit').disabled = false;
+  }
+}
+
+async function signOut() {
+  await db.auth.signOut();
+  closeModal('profileModal');
+  toast('Signed out. See you soon!');
+}
+
+function requireAuth(action) {
+  if (session) return true;
+  afterAuthAction = action || null;
+  toast('Sign in first — it takes 20 seconds');
+  openAuth('signup');
+  return false;
+}
+
+/* ============ profile ============ */
+async function loadMyProfile() {
+  if (!session) { myProfile = null; return; }
+  const { data } = await db.from('profiles').select('*').eq('id', uid()).maybeSingle();
+  myProfile = data || null;
+}
+
+function openProfile() {
+  if (!requireAuth('profile')) return;
+  const p = myProfile;
+  selAvatar = p ? p.avatar : AVATARS[0];
+  selInterests = p ? [...(p.interests || [])] : [];
+  $('pfName').value = p ? p.name : '';
+  $('pfEmojis').innerHTML = AVATARS.map(a =>
+    `<button class="emoji-opt ${a === selAvatar ? 'active' : ''}" onclick="pickAvatar('${a}', this)">${a}</button>`).join('');
+  $('pfInterests').innerHTML = CATS.map(c =>
+    `<button class="chip ${selInterests.includes(c.id) ? 'active' : ''}" onclick="toggleInterest('${c.id}', this)">${c.emoji} ${esc(c.name)}</button>`).join('');
+  openModal('profileModal');
+}
+function pickAvatar(a, el) {
+  selAvatar = a;
+  el.parentElement.querySelectorAll('.emoji-opt').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+function toggleInterest(id, el) {
+  const i = selInterests.indexOf(id);
+  if (i >= 0) selInterests.splice(i, 1); else selInterests.push(id);
+  el.classList.toggle('active');
+}
+async function saveProfile() {
+  const name = $('pfName').value.trim();
+  if (!name) { toast('Give yourself a name first'); return; }
+  const { error } = await db.from('profiles').upsert({
+    id: uid(), name, avatar: selAvatar, interests: selInterests,
+  });
+  if (error) { toast(error.message); return; }
+  await loadMyProfile();
+  renderNav(); renderCards();
+  closeModal('profileModal');
+  toast(`Welcome, ${name}! Matches are now personalized.`);
+  runAfterAuth();
+}
+
+function runAfterAuth() {
+  const a = afterAuthAction;
+  afterAuthAction = null;
+  if (a === 'create') openCreate();
+  else if (a === 'surprise') surpriseMe();
+}
+
+/* ============ data loading ============ */
+async function loadHangouts() {
+  const { data, error } = await db.from('hangouts')
+    .select('*, host:profiles!hangouts_host_id_fkey(id, name, avatar), attendees(user_id, profile:profiles!attendees_user_id_fkey(id, name, avatar))')
+    .gte('starts_at', new Date().toISOString())
+    .order('starts_at', { ascending: true });
+  if (error) { console.error(error); toast('Could not load hangouts: ' + error.message); return; }
+  hangouts = data || [];
+  renderCards();
+}
+
 /* ============ rendering ============ */
 function renderNav() {
-  if (me()) { $('navAvatar').textContent = me().avatar; $('navName').textContent = me().name; }
-  else { $('navAvatar').textContent = '🙂'; $('navName').textContent = 'Set up profile'; }
+  const el = $('navActions');
+  if (session && myProfile) {
+    el.innerHTML = `
+      <button class="avatar-chip" onclick="openProfile()">
+        <span class="em">${myProfile.avatar}</span><span id="navName">${esc(myProfile.name)}</span>
+      </button>
+      <button class="btn btn-primary" onclick="openCreate()"><span>+ Post<span class="post-label-long"> a hangout</span></span></button>`;
+  } else if (session) {
+    el.innerHTML = `
+      <button class="avatar-chip" onclick="openProfile()">
+        <span class="em">🙂</span><span id="navName">Finish profile</span>
+      </button>
+      <button class="btn btn-primary" onclick="openCreate()"><span>+ Post<span class="post-label-long"> a hangout</span></span></button>`;
+  } else {
+    el.innerHTML = `
+      <button class="btn btn-ghost" onclick="openAuth('signin')">Sign in</button>
+      <button class="btn btn-primary" onclick="openAuth('signup')"><span>Join<span class="post-label-long"> Spontano</span></span></button>`;
+  }
 }
 
 function renderStats() {
-  const hs = state.hangouts.filter(h => new Date(h.when) > new Date());
-  $('statHangouts').textContent = hs.length;
-  $('statPeople').textContent = hs.reduce((n, h) => n + peopleIn(h), 0);
-  $('statToday').textContent = hs.filter(h => dayBucket(h.when) === 'today').length;
+  $('statHangouts').textContent = hangouts.length;
+  $('statPeople').textContent = hangouts.reduce((n, h) => n + peopleIn(h), 0);
+  $('statToday').textContent = hangouts.filter(h => dayBucket(h.starts_at) === 'today').length;
 }
 
 function renderChips() {
@@ -660,21 +830,21 @@ function setCat(id) { activeCat = id; renderChips(); renderCards(); }
 function visibleHangouts() {
   const q = $('searchInput').value.trim().toLowerCase();
   const when = $('whenFilter').value;
-  let hs = state.hangouts.filter(h => new Date(h.when) > new Date());
-  if (activeCat !== 'all') hs = hs.filter(h => h.cat === activeCat);
+  let hs = [...hangouts];
+  if (activeCat !== 'all') hs = hs.filter(h => h.category === activeCat);
   if (when !== 'all') hs = hs.filter(h => when === 'week'
-    ? ['today', 'tomorrow', 'week'].includes(dayBucket(h.when))
-    : dayBucket(h.when) === when);
-  if (q) hs = hs.filter(h => (h.title + ' ' + h.desc + ' ' + h.where + ' ' + h.host.name).toLowerCase().includes(q));
+    ? ['today', 'tomorrow', 'week'].includes(dayBucket(h.starts_at))
+    : dayBucket(h.starts_at) === when);
+  if (q) hs = hs.filter(h => (h.title + ' ' + h.description + ' ' + h.location + ' ' + (h.host?.name || '')).toLowerCase().includes(q));
   const sort = $('sortFilter').value;
-  if (sort === 'soon') hs.sort((a, b) => new Date(a.when) - new Date(b.when));
-  else if (sort === 'new') hs.sort((a, b) => (b.created || 0) - (a.created || 0));
-  else hs.sort((a, b) => (matchScore(b) || 0) - (matchScore(a) || 0) || new Date(a.when) - new Date(b.when));
+  if (sort === 'soon') hs.sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+  else if (sort === 'new') hs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  else hs.sort((a, b) => (matchScore(b) || 0) - (matchScore(a) || 0) || new Date(a.starts_at) - new Date(b.starts_at));
   return hs;
 }
 
 function cardHTML(h) {
-  const cat = catOf(h.cat);
+  const cat = catOf(h.category);
   const score = matchScore(h);
   const left = spotsLeft(h);
   const full = left <= 0;
@@ -685,14 +855,14 @@ function cardHTML(h) {
       ${score ? `<span class="match-badge">${score}% match</span>` : ''}
     </div>
     <h3>${esc(h.title)}</h3>
-    <p class="desc">${esc(h.desc)}</p>
+    <p class="desc">${esc(h.description)}</p>
     <div class="card-meta">
-      <span>${fmtWhen(h.when)}</span>
-      <span>${esc(h.where)}</span>
+      <span>${fmtWhen(h.starts_at)}</span>
+      <span>${esc(h.location)}</span>
       <span>${esc(cat.name)}</span>
     </div>
     <div class="card-foot">
-      <div class="host"><span class="em">${h.host.avatar}</span> ${esc(h.host.name)}${isMine(h) ? ' (you)' : ''}</div>
+      <div class="host"><span class="em">${h.host?.avatar || '🙂'}</span> ${esc(h.host?.name || 'Someone')}${isMine(h) ? ' (you)' : ''}</div>
       ${isJoined(h) ? '<span class="joined-tag">✓ You\'re in</span>'
         : `<span class="spots ${full ? 'full' : ''}">${full ? 'Full' : (left === Infinity ? 'Open to all' : left + ' spot' + (left === 1 ? '' : 's') + ' left')}</span>`}
     </div>
@@ -711,47 +881,10 @@ function renderCards() {
   renderStats();
 }
 
-/* ============ profile ============ */
-function openProfile() {
-  const p = me();
-  selAvatar = p ? p.avatar : AVATARS[0];
-  selInterests = p ? [...p.interests] : [];
-  $('pfName').value = p ? p.name : '';
-  $('pfEmojis').innerHTML = AVATARS.map(a =>
-    `<button class="emoji-opt ${a === selAvatar ? 'active' : ''}" onclick="pickAvatar('${a}', this)">${a}</button>`).join('');
-  $('pfInterests').innerHTML = CATS.map(c =>
-    `<button class="chip ${selInterests.includes(c.id) ? 'active' : ''}" onclick="toggleInterest('${c.id}', this)">${c.emoji} ${esc(c.name)}</button>`).join('');
-  openModal('profileModal');
-}
-function pickAvatar(a, el) {
-  selAvatar = a;
-  el.parentElement.querySelectorAll('.emoji-opt').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
-function toggleInterest(id, el) {
-  const i = selInterests.indexOf(id);
-  if (i >= 0) selInterests.splice(i, 1); else selInterests.push(id);
-  el.classList.toggle('active');
-}
-function saveProfile() {
-  const name = $('pfName').value.trim();
-  if (!name) { toast('Give yourself a name first'); return; }
-  state.profile = { name, avatar: selAvatar, interests: selInterests };
-  save(); renderNav(); renderCards();
-  closeModal('profileModal');
-  toast(`Welcome, ${name}! Matches are now personalized.`);
-}
-function requireProfile(next) {
-  if (me()) return true;
-  toast('Set up a quick profile first');
-  openProfile();
-  window._afterProfile = next;
-  return false;
-}
-
 /* ============ create ============ */
 function openCreate() {
-  if (!requireProfile('create')) return;
+  if (!requireAuth('create')) return;
+  if (!myProfile) { toast('Finish your profile first'); openProfile(); return; }
   $('crCat').innerHTML = CATS.map(c => `<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
   const d = new Date(Date.now() + 3 * 3600e3);
   d.setMinutes(0, 0, 0);
@@ -759,7 +892,7 @@ function openCreate() {
   $('crWhen').value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   openModal('createModal');
 }
-function createHangout() {
+async function createHangout() {
   const title = $('crTitle').value.trim();
   const where = $('crWhere').value.trim();
   const when = $('crWhen').value;
@@ -767,33 +900,37 @@ function createHangout() {
   if (!where) { toast('Where should people meet you?'); return; }
   if (!when || new Date(when) <= new Date()) { toast('Pick a time in the future'); return; }
   const cat = catOf($('crCat').value);
-  state.hangouts.unshift({
-    id: 'u' + Date.now(),
-    title, desc: $('crDesc').value.trim() || 'No description — pure mystery.',
-    cat: cat.id, emoji: cat.emoji,
-    when: new Date(when).toISOString(),
-    where, spots: parseInt($('crSpots').value, 10),
-    host: { name: me().name, avatar: me().avatar },
-    joined: [], msgs: [], created: Date.now(),
+  $('crSubmit').disabled = true;
+  const { error } = await db.from('hangouts').insert({
+    host_id: uid(),
+    title,
+    description: $('crDesc').value.trim() || 'No description — pure mystery.',
+    category: cat.id, emoji: cat.emoji,
+    starts_at: new Date(when).toISOString(),
+    location: where,
+    spots: parseInt($('crSpots').value, 10),
   });
-  save();
+  $('crSubmit').disabled = false;
+  if (error) { toast(error.message); return; }
   ['crTitle', 'crDesc', 'crWhere'].forEach(id => $(id).value = '');
   closeModal('createModal');
-  renderCards();
-  toast('Posted! Your hangout is live.');
+  await loadHangouts();
+  toast('Posted! Your hangout is live for everyone.');
   scrollToDiscover();
 }
 
 /* ============ detail / join / chat ============ */
-function openDetail(id) {
-  const h = state.hangouts.find(x => x.id === id);
+function findHangout(id) { return hangouts.find(x => x.id === id); }
+
+async function openDetail(id) {
+  const h = findHangout(id);
   if (!h) return;
-  const cat = catOf(h.cat);
+  const cat = catOf(h.category);
   const score = matchScore(h);
   const left = spotsLeft(h);
   const joined = isJoined(h), mine = isMine(h);
   const full = left <= 0 && !joined;
-  const attendees = [{ ...h.host, host: true }, ...h.joined];
+  const attendees = [{ user_id: h.host_id, profile: h.host, host: true }, ...h.attendees];
   $('detailBody').innerHTML = `
     <div class="modal-head">
       <h2 style="font-size:.95rem;color:var(--muted);font-weight:500">${cat.emoji} ${esc(cat.name)}</h2>
@@ -806,16 +943,16 @@ function openDetail(id) {
         ${score ? `<span class="match-badge" style="margin-top:6px;display:inline-block">${score}% match for you</span>` : ''}
       </div>
     </div>
-    <p style="color:var(--muted);font-size:.94rem">${esc(h.desc)}</p>
+    <p style="color:var(--muted);font-size:.94rem">${esc(h.description)}</p>
     <div class="detail-meta">
-      <div class="dm"><b>When</b>${fmtWhen(h.when)}</div>
-      <div class="dm"><b>Where</b>${esc(h.where)}</div>
-      <div class="dm"><b>Host</b>${h.host.avatar} ${esc(h.host.name)}${mine ? ' (you)' : ''}</div>
+      <div class="dm"><b>When</b>${fmtWhen(h.starts_at)}</div>
+      <div class="dm"><b>Where</b>${esc(h.location)}</div>
+      <div class="dm"><b>Host</b>${h.host?.avatar || '🙂'} ${esc(h.host?.name || 'Someone')}${mine ? ' (you)' : ''}</div>
       <div class="dm"><b>Spots</b>${peopleIn(h)} in · ${left === Infinity ? 'no limit' : (left <= 0 ? 'full' : left + ' left')}</div>
     </div>
     <b style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Who's in</b>
     <div class="attendees">
-      ${attendees.map(a => `<span class="attendee"><span class="em">${a.avatar}</span>${esc(a.name)}${a.host ? ' · host' : ''}</span>`).join('')}
+      ${attendees.map(a => `<span class="attendee"><span class="em">${a.profile?.avatar || '🙂'}</span>${esc(a.profile?.name || 'Someone')}${a.host ? ' · host' : ''}</span>`).join('')}
     </div>
     ${mine ? `<button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="cancelHangout('${h.id}')">Cancel this hangout</button>`
       : joined ? `<button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="leaveHangout('${h.id}')">Leave hangout</button>`
@@ -823,9 +960,7 @@ function openDetail(id) {
     ${(joined || mine) ? `
     <div class="chat-box">
       <b style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Hangout chat</b>
-      <div class="chat-msgs" id="chatMsgs">
-        ${h.msgs.length ? h.msgs.map(m => `<div class="chat-msg ${me() && m.who === me().name ? 'mine' : ''}"><b>${esc(m.who)}:</b> ${esc(m.text)}</div>`).join('') : '<div class="chat-msg" style="color:var(--muted)">No messages yet — say hi 👋</div>'}
-      </div>
+      <div class="chat-msgs" id="chatMsgs"><div class="chat-msg" style="color:var(--muted)">Loading chat…</div></div>
       <div class="chat-input-row">
         <input id="chatInput" type="text" maxlength="200" placeholder="Message the group…" onkeydown="if(event.key==='Enter')sendMsg('${h.id}')">
         <button class="btn btn-primary" style="padding:10px 18px" onclick="sendMsg('${h.id}')">Send</button>
@@ -833,57 +968,81 @@ function openDetail(id) {
     </div>` : ''}
   `;
   openModal('detailModal');
-  const cm = $('chatMsgs'); if (cm) cm.scrollTop = cm.scrollHeight;
+  if (joined || mine) {
+    await refreshChat(id);
+    if (chatTimer) clearInterval(chatTimer);
+    chatTimer = setInterval(() => refreshChat(id), 6000);
+  }
 }
 
-function joinHangout(id) {
-  if (!requireProfile()) { closeModal('detailModal'); return; }
-  const h = state.hangouts.find(x => x.id === id);
-  if (!h || spotsLeft(h) <= 0) return;
-  h.joined.push({ name: me().name, avatar: me().avatar });
-  state.joinedIds.push(id);
-  save(); renderCards(); openDetail(id);
-  toast(`You're in! See you at ${h.where}.`);
+async function refreshChat(id) {
+  const box = $('chatMsgs');
+  if (!box) return;
+  const { data, error } = await db.from('messages')
+    .select('body, created_at, user_id, profile:profiles(name)')
+    .eq('hangout_id', id)
+    .order('created_at', { ascending: true })
+    .limit(100);
+  if (error) { box.innerHTML = `<div class="chat-msg" style="color:var(--muted)">${esc(error.message)}</div>`; return; }
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  box.innerHTML = (data && data.length)
+    ? data.map(m => `<div class="chat-msg ${m.user_id === uid() ? 'mine' : ''}"><b>${esc(m.profile?.name || 'Someone')}:</b> ${esc(m.body)}</div>`).join('')
+    : '<div class="chat-msg" style="color:var(--muted)">No messages yet — say hi 👋</div>';
+  if (nearBottom) box.scrollTop = box.scrollHeight;
 }
-function leaveHangout(id) {
-  const h = state.hangouts.find(x => x.id === id);
-  if (!h) return;
-  h.joined = h.joined.filter(a => !(a.name === me().name && a.avatar === me().avatar));
-  state.joinedIds = state.joinedIds.filter(x => x !== id);
-  save(); renderCards(); openDetail(id);
+
+async function joinHangout(id) {
+  if (!requireAuth()) { closeModal('detailModal'); return; }
+  if (!myProfile) { toast('Finish your profile first'); openProfile(); return; }
+  const h = findHangout(id);
+  if (!h || spotsLeft(h) <= 0) return;
+  const { error } = await db.from('attendees').insert({ hangout_id: id, user_id: uid() });
+  if (error) { toast(error.message); return; }
+  await loadHangouts();
+  openDetail(id);
+  toast(`You're in! See you at ${h.location}.`);
+}
+async function leaveHangout(id) {
+  const { error } = await db.from('attendees').delete().eq('hangout_id', id).eq('user_id', uid());
+  if (error) { toast(error.message); return; }
+  await loadHangouts();
+  openDetail(id);
   toast('You left the hangout.');
 }
-function cancelHangout(id) {
-  state.hangouts = state.hangouts.filter(h => h.id !== id);
-  state.joinedIds = state.joinedIds.filter(x => x !== id);
-  save(); renderCards(); closeModal('detailModal');
+async function cancelHangout(id) {
+  const { error } = await db.from('hangouts').delete().eq('id', id);
+  if (error) { toast(error.message); return; }
+  closeModal('detailModal');
+  await loadHangouts();
   toast('Hangout cancelled.');
 }
-function sendMsg(id) {
-  const h = state.hangouts.find(x => x.id === id);
+async function sendMsg(id) {
   const input = $('chatInput');
   const text = input.value.trim();
-  if (!h || !text) return;
-  h.msgs.push({ who: me().name, text });
-  save(); openDetail(id);
+  if (!text) return;
+  input.value = '';
+  const { error } = await db.from('messages').insert({ hangout_id: id, user_id: uid(), body: text });
+  if (error) { toast(error.message); input.value = text; return; }
+  await refreshChat(id);
+  const box = $('chatMsgs'); if (box) box.scrollTop = box.scrollHeight;
 }
 
 /* ============ surprise me ============ */
 function surpriseMe() {
-  if (!requireProfile('surprise')) return;
-  const open = state.hangouts.filter(h => new Date(h.when) > new Date() && !isMine(h) && !isJoined(h) && spotsLeft(h) > 0);
+  if (!requireAuth('surprise')) return;
+  const open = hangouts.filter(h => !isMine(h) && !isJoined(h) && spotsLeft(h) > 0);
   if (!open.length) { toast('No open hangouts to match — post one!'); return; }
   const scored = open.map(h => ({ h, s: (matchScore(h) || 50) + Math.random() * 20 }));
   scored.sort((a, b) => b.s - a.s);
   const pick = (Math.random() < 0.75 ? scored[0] : scored[Math.floor(Math.random() * scored.length)]).h;
-  const cat = catOf(pick.cat);
-  const why = me().interests.includes(pick.cat)
+  const cat = catOf(pick.category);
+  const why = myProfile && myProfile.interests && myProfile.interests.includes(pick.category)
     ? `Matched on your love of ${cat.name.toLowerCase()}`
     : 'Wildcard pick — step out of your bubble';
   $('surpriseBody').innerHTML = `
     <span class="spin-emoji">${pick.emoji || cat.emoji}</span>
     <h3>${esc(pick.title)}</h3>
-    <p style="color:var(--muted);font-size:.92rem">${fmtWhen(pick.when)} · ${esc(pick.where)} · ${pick.host.avatar} ${esc(pick.host.name)}</p>
+    <p style="color:var(--muted);font-size:.92rem">${fmtWhen(pick.starts_at)} · ${esc(pick.location)} · ${pick.host?.avatar || '🙂'} ${esc(pick.host?.name || 'Someone')}</p>
     <div class="why">${esc(why)}</div><br>
     <button class="btn btn-primary btn-lg" onclick="closeModal('surpriseModal');openDetail('${pick.id}')">Show me this plan</button>
     <br><br>
@@ -894,6 +1053,22 @@ function surpriseMe() {
 
 function scrollToDiscover() { document.getElementById('discover').scrollIntoView({ behavior: 'smooth' }); }
 
+/* ============ contact form ============ */
+async function sendContact() {
+  const name = $('ctName').value.trim();
+  const email = $('ctEmail').value.trim();
+  const msg = $('ctMsg').value.trim();
+  if (!name) { toast('Tell us your name'); return; }
+  if (!email || !email.includes('@')) { toast('Enter a valid email so we can reply'); return; }
+  if (!msg) { toast('Write a message first'); return; }
+  $('ctSubmit').disabled = true;
+  const { error } = await db.from('contact_messages').insert({ name, email, message: msg });
+  $('ctSubmit').disabled = false;
+  if (error) { toast('Could not send: ' + error.message); return; }
+  ['ctName', 'ctEmail', 'ctMsg'].forEach(id => $(id).value = '');
+  toast('Message sent — thank you! We\'ll get back to you.');
+}
+
 /* ============ scroll reveal ============ */
 const io = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
@@ -902,9 +1077,36 @@ document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
 /* ============ init ============ */
 $('year').textContent = new Date().getFullYear();
-renderNav();
 renderChips();
-renderCards();
+renderNav();
+
+(async () => {
+  const { data } = await db.auth.getSession();
+  session = data.session;
+  if (session) await loadMyProfile();
+  renderNav();
+  await loadHangouts();
+
+  db.auth.onAuthStateChange(async (event, s) => {
+    const wasSignedIn = !!session;
+    session = s;
+    await loadMyProfile();
+    renderNav();
+    renderCards();
+    if (s && !wasSignedIn) {
+      if (!myProfile) {
+        toast('Welcome! Set up your profile to get going.');
+        openProfile();
+      } else {
+        toast(`Welcome back, ${myProfile.name}!`);
+        runAfterAuth();
+      }
+    }
+  });
+
+  // refresh the feed every 30s so new posts from others appear
+  setInterval(loadHangouts, 30000);
+})();
 </script>
 </body>
 </html>
