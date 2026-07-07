@@ -5,60 +5,91 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spontano — Find your people, right now</title>
 <meta name="description" content="Spontano connects people who want to hang out in the city or do something random — post a plan, find a match, meet up.">
+<meta property="og:title" content="Spontano — Find your people, right now">
+<meta property="og:description" content="Post a plan or join one: coffee, a walk, board games. No endless chats, just meetups.">
+<meta property="og:image" content="icons/og-image.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#C24E2A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --bg: #ffffff;
-    --bg-soft: #f5f5f7;
-    --text: #1d1d1f;
-    --muted: #6e6e73;
-    --border: #e8e8ed;
-    --accent: #0071e3;
-    --accent-hover: #0077ed;
+    --bg: #FBF8F2;
+    --bg-card: #FFFFFF;
+    --ink: #1F1811;
+    --muted: #7C7264;
+    --border: #E9E1D2;
+    --accent: #C24E2A;
+    --accent-hover: #A93F1F;
+    --accent-soft: rgba(194,78,42,.09);
+    --green: #2E6B4F;
+    --green-soft: rgba(46,107,79,.10);
     --radius: 18px;
-    --shadow-sm: 0 2px 12px rgba(0,0,0,.06);
-    --shadow-md: 0 12px 32px rgba(0,0,0,.10);
+    --shadow-sm: 0 2px 10px rgba(60,45,25,.06);
+    --shadow-md: 0 14px 34px rgba(60,45,25,.12);
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-ui: 'Schibsted Grotesk', 'Helvetica Neue', sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Helvetica Neue', 'Segoe UI', sans-serif;
+    color: var(--ink);
+    font-family: var(--font-ui);
     line-height: 1.55;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
   }
-  h1,h2,h3,h4 { line-height: 1.12; letter-spacing: -0.015em; }
+  h1,h2 { font-family: var(--font-display); font-weight: 400; line-height: 1.05; letter-spacing: 0; }
+  h3,h4 { line-height: 1.15; letter-spacing: -0.01em; }
   button { font-family: inherit; cursor: pointer; }
   input, select, textarea { font-family: inherit; }
-  ::selection { background: rgba(0,113,227,.18); }
+  ::selection { background: rgba(194,78,42,.18); }
+
+  /* ---------- live dot ---------- */
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+    display: inline-block; flex-shrink: 0; position: relative;
+  }
+  .pulse-dot::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--green); opacity: 0;
+    animation: pulse-ring 2.2s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(.5); opacity: .8; }
+    70% { transform: scale(1.3); opacity: 0; }
+    100% { opacity: 0; }
+  }
 
   /* ---------- nav ---------- */
   nav {
     position: sticky; top: 0; z-index: 50;
     display: flex; align-items: center; justify-content: space-between; gap: 20px;
     padding: 10px clamp(16px, 5vw, 56px);
-    backdrop-filter: saturate(180%) blur(20px);
-    background: rgba(255,255,255,.78);
+    backdrop-filter: saturate(160%) blur(18px);
+    background: rgba(251,248,242,.82);
     border-bottom: 1px solid var(--border);
   }
   .logo {
-    display: flex; align-items: center; gap: 8px;
-    font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em;
-    text-decoration: none; color: var(--text);
+    display: flex; align-items: center; gap: 9px;
+    font-weight: 700; font-size: 1.12rem; letter-spacing: -0.02em;
+    text-decoration: none; color: var(--ink);
   }
   .logo-mark {
-    width: 26px; height: 26px; border-radius: 8px;
-    background: var(--accent); color: #fff;
-    display: grid; place-items: center; font-size: .8rem; font-weight: 700;
+    width: 27px; height: 27px; border-radius: 9px;
+    background: var(--accent); color: #FBF8F2;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-size: 1.05rem; font-style: italic;
   }
   .nav-links { display: flex; gap: 28px; align-items: center; }
   .nav-links a { color: var(--muted); text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .2s; white-space: nowrap; }
-  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover { color: var(--ink); }
   .nav-actions { display: flex; gap: 10px; align-items: center; }
   @media (max-width: 1000px) { .nav-links { display: none; } }
   @media (max-width: 640px) {
@@ -71,79 +102,101 @@
 
   .btn {
     border: none; border-radius: 980px; padding: 11px 22px;
-    font-weight: 500; font-size: .92rem;
-    transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+    font-weight: 600; font-size: .92rem;
+    transition: background .2s ease, transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
     display: inline-flex; align-items: center; gap: 8px;
   }
-  .btn:active { transform: scale(.98); }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-hover); }
-  .btn-ghost { background: var(--bg-soft); color: var(--text); }
-  .btn-ghost:hover { background: #e8e8ed; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--accent); color: #FBF8F2; box-shadow: 0 2px 10px rgba(194,78,42,.25); }
+  .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 6px 18px rgba(194,78,42,.3); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border); background: var(--bg-card); }
+  .btn-ghost:hover { border-color: #d5cbb8; }
   .btn-lg { padding: 15px 32px; font-size: 1.02rem; }
-  .link-btn { background: none; border: none; color: var(--accent); font-size: .88rem; font-weight: 500; }
+  .link-btn { background: none; border: none; color: var(--accent); font-size: .88rem; font-weight: 600; }
   .link-btn:hover { text-decoration: underline; }
 
   .avatar-chip {
     display: flex; align-items: center; gap: 8px;
-    background: var(--bg-soft); border: 1px solid var(--border);
-    border-radius: 980px; padding: 5px 14px 5px 5px; color: var(--text);
-    font-weight: 500; font-size: .85rem;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 980px; padding: 5px 14px 5px 5px; color: var(--ink);
+    font-weight: 600; font-size: .85rem; transition: border-color .2s;
   }
-  .avatar-chip:hover { background: #e8e8ed; }
-  .avatar-chip .em { width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 1px solid var(--border); display: grid; place-items: center; font-size: .95rem; }
+  .avatar-chip:hover { border-color: #d5cbb8; }
+  .avatar-chip .em { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: grid; place-items: center; font-size: .95rem; }
 
   /* ---------- hero ---------- */
   .hero {
-    max-width: 980px; margin: 0 auto;
-    padding: clamp(70px, 11vw, 130px) clamp(16px, 5vw, 56px) 48px;
+    max-width: 1020px; margin: 0 auto;
+    padding: clamp(64px, 10vw, 116px) clamp(16px, 5vw, 56px) 48px;
     text-align: center;
   }
   .hero-badge {
-    display: inline-block;
-    color: var(--accent); font-size: .95rem; font-weight: 600;
-    margin-bottom: 18px;
+    display: inline-flex; align-items: center; gap: 9px;
+    color: var(--green); font-size: .9rem; font-weight: 600;
+    margin-bottom: 22px; background: var(--green-soft);
+    padding: 7px 16px; border-radius: 980px;
   }
   .hero h1 {
-    font-size: clamp(2.7rem, 6.5vw, 4.8rem);
-    font-weight: 700; letter-spacing: -0.025em; margin-bottom: 24px;
+    font-size: clamp(3rem, 7.5vw, 5.6rem);
+    margin-bottom: 22px;
   }
-  .hero h1 .soft { color: var(--muted); }
+  .hero h1 .soft { font-style: italic; color: var(--accent); }
   .hero p.sub {
-    max-width: 620px; margin: 0 auto 36px;
-    color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.3rem);
-    font-weight: 400;
+    max-width: 600px; margin: 0 auto 34px;
+    color: var(--muted); font-size: clamp(1.02rem, 2vw, 1.22rem);
   }
-  .hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 64px; }
+  .hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+
+  /* live ticker */
+  .ticker {
+    height: 28px; margin-bottom: 44px; overflow: hidden;
+    display: flex; justify-content: center;
+  }
+  .ticker-item {
+    display: inline-flex; align-items: center; gap: 9px;
+    color: var(--muted); font-size: .88rem;
+    animation: ticker-in .45s ease both;
+  }
+  .ticker-item b { color: var(--ink); font-weight: 600; }
+  .ticker-item .tk-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  @keyframes ticker-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .ticker-item.out { animation: ticker-out .35s ease both; }
+  @keyframes ticker-out { to { opacity: 0; transform: translateY(-12px); } }
 
   .hero-stats {
     display: flex; justify-content: center; gap: clamp(28px, 7vw, 90px); flex-wrap: wrap;
     color: var(--muted); font-size: .88rem;
   }
-  .hero-stats .stat b { display: block; font-size: 2rem; color: var(--text); font-weight: 700; letter-spacing: -0.02em; }
+  .hero-stats .stat b {
+    display: block; font-size: 2.3rem; color: var(--ink);
+    font-family: var(--font-display); font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
 
   /* ---------- sections ---------- */
   section { padding: 72px 0; scroll-margin-top: 60px; }
   .container { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 5vw, 56px); }
-  .section-soft { background: var(--bg-soft); }
+  .section-soft { background: #F4EEE2; }
   .section-head { text-align: center; margin-bottom: 48px; }
-  .section-head h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; margin-bottom: 12px; }
-  .section-head p { color: var(--muted); max-width: 560px; margin: 0 auto; font-size: 1.05rem; }
+  .section-head h2 { font-size: clamp(2rem, 4.5vw, 3rem); margin-bottom: 12px; }
+  .section-head p { color: var(--muted); max-width: 560px; margin: 0 auto; font-size: 1.02rem; }
 
   /* how it works */
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
   .step {
-    background: #fff; border-radius: var(--radius); padding: 36px 30px;
-    box-shadow: var(--shadow-sm);
+    background: var(--bg-card); border-radius: var(--radius); padding: 36px 30px;
+    box-shadow: var(--shadow-sm); border: 1px solid rgba(233,225,210,.6);
     transition: transform .25s ease, box-shadow .25s ease;
   }
   .step:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
   .step .num {
     width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(0,113,227,.09); color: var(--accent);
-    display: grid; place-items: center; font-size: 1.15rem; margin-bottom: 20px;
+    background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center; margin-bottom: 20px;
+    font-family: var(--font-display); font-size: 1.4rem; font-style: italic;
   }
-  .step h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+  .step h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
   .step p { color: var(--muted); font-size: .95rem; }
 
   /* ---------- discover ---------- */
@@ -152,132 +205,155 @@
   .search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); }
   .search-wrap input {
     width: 100%; padding: 12px 16px 12px 42px;
-    background: #fff; border: 1px solid var(--border);
-    border-radius: 12px; color: var(--text); font-size: .95rem; outline: none;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--ink); font-size: .95rem; outline: none;
     transition: border .2s, box-shadow .2s;
   }
-  .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,.12); }
+  .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .select-wrap select {
-    padding: 12px 16px; background: #fff; color: var(--text);
+    padding: 12px 16px; background: var(--bg-card); color: var(--ink);
     border: 1px solid var(--border); border-radius: 12px; font-size: .9rem; outline: none;
   }
 
   .cat-chips { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 30px; }
   .chip {
-    background: #fff; border: 1px solid var(--border);
+    background: var(--bg-card); border: 1px solid var(--border);
     color: var(--muted); border-radius: 980px; padding: 8px 18px;
     font-size: .87rem; font-weight: 500; transition: all .18s;
+    display: inline-flex; align-items: center; gap: 8px;
   }
-  .chip:hover { color: var(--text); border-color: #c7c7cc; }
-  .chip.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .chip .c-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .chip:hover { color: var(--ink); border-color: #d5cbb8; transform: translateY(-1px); }
+  .chip.active { background: var(--ink); color: #FBF8F2; border-color: var(--ink); }
 
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
   .card {
-    background: #fff; border-radius: var(--radius); padding: 26px;
-    box-shadow: var(--shadow-sm);
+    background: var(--bg-card); border-radius: var(--radius); padding: 26px;
+    box-shadow: var(--shadow-sm); border: 1px solid rgba(233,225,210,.6);
     display: flex; flex-direction: column; gap: 14px;
-    transition: transform .25s ease, box-shadow .25s ease;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
     cursor: pointer;
+    border-top: 3px solid var(--cat-color, var(--border));
   }
-  .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+  .card-in { animation: card-in .5s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes card-in { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
   .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .card-emoji {
-    width: 52px; height: 52px; border-radius: 14px; background: var(--bg-soft);
+    width: 52px; height: 52px; border-radius: 14px;
+    background: color-mix(in oklab, var(--cat-color, var(--border)) 12%, white);
     display: grid; place-items: center; font-size: 1.55rem; flex-shrink: 0;
+    transition: transform .25s ease;
   }
+  .card:hover .card-emoji { transform: scale(1.08) rotate(-4deg); }
   .match-badge {
-    font-size: .74rem; font-weight: 600; padding: 5px 12px; border-radius: 980px;
-    background: rgba(0,113,227,.09); color: var(--accent);
+    font-size: .74rem; font-weight: 700; padding: 5px 12px; border-radius: 980px;
+    background: var(--accent-soft); color: var(--accent);
     white-space: nowrap;
   }
-  .card h3 { font-size: 1.15rem; font-weight: 600; }
+  .card h3 { font-size: 1.15rem; font-weight: 700; }
   .card .desc { color: var(--muted); font-size: .9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .card-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: .83rem; }
-  .card-meta span { display: inline-flex; align-items: center; gap: 6px; }
-  .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--bg-soft); }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: .83rem; align-items: center; }
+  .card-meta .when-soon { color: var(--green); font-weight: 700; display: inline-flex; align-items: center; gap: 7px; }
+  .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid #F4EEE2; }
   .host { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); }
-  .host .em { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-soft); display: grid; place-items: center; }
-  .spots { font-size: .82rem; font-weight: 600; color: var(--accent); }
-  .spots.full { color: #d70015; }
-  .joined-tag { font-size: .78rem; font-weight: 600; color: #248a3d; }
+  .host .em { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; }
+  .spots { font-size: .82rem; font-weight: 700; color: var(--accent); }
+  .spots.full { color: #A03028; }
+  .joined-tag { font-size: .78rem; font-weight: 700; color: var(--green); }
+
+  /* skeleton loading */
+  .skel-card {
+    background: var(--bg-card); border-radius: var(--radius); padding: 26px;
+    border: 1px solid rgba(233,225,210,.6); border-top: 3px solid var(--border);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .sk { border-radius: 8px; background: linear-gradient(90deg, #F1EADC 25%, #F9F5EC 50%, #F1EADC 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
   .empty {
     text-align: center; padding: 70px 20px; color: var(--muted);
-    border: 1px dashed #c7c7cc; border-radius: var(--radius); background: #fff;
+    border: 1px dashed #d5cbb8; border-radius: var(--radius); background: var(--bg-card);
   }
-  .empty .big { font-size: 2.4rem; margin-bottom: 12px; }
+  .empty .big { font-family: var(--font-display); font-style: italic; font-size: 2rem; color: var(--ink); margin-bottom: 10px; }
 
   /* ---------- random match banner ---------- */
   .random-banner {
-    background: var(--text); color: #fff;
+    background: var(--ink); color: #FBF8F2;
     border-radius: 24px; padding: clamp(32px, 5vw, 52px);
     display: flex; align-items: center; justify-content: space-between;
-    gap: 24px; flex-wrap: wrap;
+    gap: 24px; flex-wrap: wrap; position: relative; overflow: hidden;
   }
-  .random-banner h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; margin-bottom: 8px; }
-  .random-banner p { color: rgba(255,255,255,.65); max-width: 480px; font-size: .98rem; }
-  .random-banner .btn-primary { background: #fff; color: var(--text); }
-  .random-banner .btn-primary:hover { background: #f0f0f2; }
+  .random-banner::before {
+    content: ''; position: absolute; right: -60px; top: -60px;
+    width: 240px; height: 240px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(194,78,42,.35), transparent 70%);
+  }
+  .random-banner h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); margin-bottom: 8px; }
+  .random-banner h2 em { color: #E8906B; }
+  .random-banner p { color: rgba(251,248,242,.6); max-width: 480px; font-size: .98rem; }
+  .random-banner .btn-primary { background: #FBF8F2; color: var(--ink); box-shadow: none; }
+  .random-banner .btn-primary:hover { background: #efe8da; }
 
   /* ---------- footer ---------- */
   footer {
-    background: var(--bg-soft); border-top: 1px solid var(--border);
+    background: #F4EEE2; border-top: 1px solid var(--border);
     padding: 28px clamp(16px, 5vw, 56px);
     display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
     color: var(--muted); font-size: .82rem;
   }
-  footer b { color: var(--text); font-weight: 600; }
+  footer b { color: var(--ink); font-weight: 700; }
 
   /* ---------- modals ---------- */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 100;
-    background: rgba(0,0,0,.35); backdrop-filter: blur(6px);
+    background: rgba(31,24,17,.4); backdrop-filter: blur(6px);
     display: none; align-items: flex-start; justify-content: center;
     padding: 5vh 16px; overflow-y: auto;
   }
   .modal-overlay.open { display: flex; animation: fadeIn .2s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .modal {
-    background: #fff;
-    border-radius: 22px; box-shadow: 0 24px 70px rgba(0,0,0,.22);
+    background: var(--bg);
+    border-radius: 22px; box-shadow: 0 24px 70px rgba(31,24,17,.3);
     width: 100%; max-width: 540px; padding: 34px;
-    animation: slideUp .25s ease;
+    animation: slideUp .3s cubic-bezier(.22,1,.36,1);
   }
-  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
   .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
-  .modal-head h2 { font-size: 1.35rem; font-weight: 700; }
+  .modal-head h2 { font-size: 1.6rem; }
   .close-x {
-    background: var(--bg-soft); border: none; color: var(--muted);
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--muted);
     width: 34px; height: 34px; border-radius: 50%; font-size: 1rem;
-    transition: background .2s;
+    transition: all .2s;
   }
-  .close-x:hover { background: #e8e8ed; color: var(--text); }
+  .close-x:hover { color: var(--ink); border-color: #d5cbb8; }
 
   .field { margin-bottom: 18px; }
   .field label { display: block; font-size: .83rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
   .field input, .field select, .field textarea {
     width: 100%; padding: 12px 15px;
-    background: #fff; border: 1px solid var(--border);
-    border-radius: 12px; color: var(--text); font-size: .95rem; outline: none;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--ink); font-size: .95rem; outline: none;
     transition: border .2s, box-shadow .2s;
   }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,.12); }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .field textarea { resize: vertical; min-height: 84px; }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
 
   .interest-grid { display: flex; flex-wrap: wrap; gap: 9px; }
-  .interest-grid .chip { padding: 7px 15px; font-size: .84rem; background: var(--bg-soft); border-color: transparent; }
-  .interest-grid .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .interest-grid .chip { padding: 7px 15px; font-size: .84rem; background: var(--bg-card); }
+  .interest-grid .chip.active { background: var(--accent); border-color: var(--accent); color: #FBF8F2; }
 
   .emoji-row { display: flex; flex-wrap: wrap; gap: 8px; }
   .emoji-opt {
     width: 44px; height: 44px; border-radius: 12px; font-size: 1.3rem;
-    background: var(--bg-soft); border: 2px solid transparent;
+    background: var(--bg-card); border: 2px solid var(--border);
     display: grid; place-items: center; transition: all .15s;
   }
-  .emoji-opt:hover { background: #e8e8ed; }
-  .emoji-opt.active { border-color: var(--accent); background: rgba(0,113,227,.08); }
+  .emoji-opt:hover { transform: scale(1.1); }
+  .emoji-opt.active { border-color: var(--accent); background: var(--accent-soft); }
 
   /* detail modal */
   .detail-hero { display: flex; gap: 16px; align-items: center; margin-bottom: 18px; }
@@ -285,42 +361,46 @@
   .detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
   @media (max-width: 480px) { .detail-meta { grid-template-columns: 1fr; } }
   .detail-meta .dm {
-    background: var(--bg-soft);
+    background: var(--bg-card); border: 1px solid var(--border);
     border-radius: 12px; padding: 12px 15px; font-size: .88rem;
   }
-  .detail-meta .dm b { display: block; font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 3px; font-weight: 600; }
+  .detail-meta .dm b { display: block; font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 3px; font-weight: 700; }
   .attendees { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 20px; }
   .attendee {
     display: inline-flex; align-items: center; gap: 7px;
-    background: var(--bg-soft);
+    background: var(--bg-card); border: 1px solid var(--border);
     border-radius: 980px; padding: 4px 13px 4px 4px; font-size: .84rem;
+    animation: card-in .4s ease both;
   }
-  .attendee .em { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1px solid var(--border); display: grid; place-items: center; font-size: .85rem; }
+  .attendee .em { width: 26px; height: 26px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: grid; place-items: center; font-size: .85rem; }
 
   .chat-box {
-    background: var(--bg-soft);
+    background: var(--bg-card); border: 1px solid var(--border);
     border-radius: 14px; padding: 14px; margin-top: 20px;
   }
   .chat-msgs { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; margin-bottom: 12px; }
   .chat-msg { font-size: .87rem; }
-  .chat-msg b { color: var(--text); font-weight: 600; }
+  .chat-msg.msg-new { animation: card-in .3s ease both; }
+  .chat-msg b { color: var(--ink); font-weight: 700; }
   .chat-msg.mine b { color: var(--accent); }
   .chat-input-row { display: flex; gap: 8px; }
   .chat-input-row input {
-    flex: 1; padding: 10px 14px; background: #fff;
-    border: 1px solid var(--border); border-radius: 980px; color: var(--text); outline: none;
+    flex: 1; padding: 10px 14px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 980px; color: var(--ink); outline: none;
     font-size: .9rem;
   }
   .chat-input-row input:focus { border-color: var(--accent); }
 
-  /* match reveal */
+  /* match reveal / roulette */
   .match-reveal { text-align: center; padding: 8px 0; }
-  .match-reveal .spin-emoji { font-size: 3.2rem; display: inline-block; animation: pop .45s ease; }
+  .match-reveal .spin-emoji { font-size: 3.2rem; display: inline-block; animation: pop .45s cubic-bezier(.34,1.56,.64,1); }
+  .roulette { font-size: 3.2rem; display: inline-block; }
+  .roulette-title { font-family: var(--font-display); font-size: 1.5rem; margin: 12px 0 6px; min-height: 1.6em; color: var(--muted); font-style: italic; }
   @keyframes pop { 0% { transform: scale(.4) rotate(-16deg); } 70% { transform: scale(1.12) rotate(4deg); } 100% { transform: scale(1); } }
-  .match-reveal h3 { font-size: 1.45rem; font-weight: 700; margin: 12px 0 6px; }
+  .match-reveal h3 { font-size: 1.5rem; font-weight: 700; margin: 12px 0 6px; }
   .match-reveal .why {
     display: inline-block; margin: 10px 0 18px; padding: 7px 17px;
-    background: rgba(0,113,227,.09); color: var(--accent);
+    background: var(--accent-soft); color: var(--accent);
     border-radius: 980px; font-size: .85rem; font-weight: 600;
   }
 
@@ -329,17 +409,74 @@
   /* toast */
   #toast {
     position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(120px);
-    background: var(--text);
-    color: #fff; padding: 13px 24px; border-radius: 980px;
+    background: var(--ink);
+    color: #FBF8F2; padding: 13px 24px; border-radius: 980px;
     font-size: .9rem; font-weight: 500; z-index: 200;
-    box-shadow: var(--shadow-md); transition: transform .3s ease;
+    box-shadow: var(--shadow-md); transition: transform .35s cubic-bezier(.22,1,.36,1);
     display: flex; align-items: center; gap: 10px;
     max-width: 90vw; text-align: center;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 
+  /* confetti */
+  .confetti-bit {
+    position: fixed; width: 9px; height: 9px; z-index: 300; pointer-events: none;
+    animation: conf-fall 1s cubic-bezier(.2,.6,.4,1) forwards;
+  }
+  @keyframes conf-fall {
+    0% { transform: translate(0,0) rotate(0); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
+  }
+
   .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.visible { opacity: 1; transform: none; }
+
+  /* ---------- mobile menu ---------- */
+  .menu-btn { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; width: 38px; height: 38px; place-items: center; color: var(--ink); flex-shrink: 0; }
+  @media (max-width: 1000px) { .menu-btn { display: grid; } }
+  .mobile-menu {
+    position: fixed; top: 55px; left: 0; right: 0; z-index: 49;
+    background: var(--bg); border-bottom: 1px solid var(--border); box-shadow: var(--shadow-md);
+    display: none; flex-direction: column; padding: 6px 20px 14px;
+  }
+  .mobile-menu.open { display: flex; animation: fadeIn .2s ease; }
+  .mobile-menu a { padding: 13px 4px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 1rem; border-bottom: 1px solid var(--border); }
+  .mobile-menu a:last-child { border-bottom: none; }
+
+  /* ---------- faq ---------- */
+  .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  .faq-item { background: var(--bg-card); border: 1px solid rgba(233,225,210,.6); border-radius: 14px; padding: 4px 22px; }
+  .faq-item summary { cursor: pointer; font-weight: 600; padding: 14px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after { content: '+'; font-family: var(--font-display); font-size: 1.5rem; color: var(--accent); transition: transform .2s; flex-shrink: 0; }
+  .faq-item[open] summary::after { transform: rotate(45deg); }
+  .faq-item p { color: var(--muted); font-size: .93rem; padding: 0 0 16px; }
+  .faq-item p a { color: var(--accent); }
+
+  /* ---------- footer ---------- */
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 28px; max-width: 1120px; margin: 0 auto; width: 100%; }
+  @media (max-width: 760px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+  footer h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: .6px; color: var(--ink); margin-bottom: 10px; }
+  footer a { display: block; color: var(--muted); text-decoration: none; padding: 4px 0; font-size: .86rem; }
+  footer a:hover { color: var(--ink); }
+  .footer-bottom { max-width: 1120px; margin: 26px auto 0; padding-top: 18px; border-top: 1px solid #ddd3c1; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: .8rem; width: 100%; }
+
+  /* ---------- my plans ---------- */
+  .plan-row { display: flex; align-items: center; gap: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s, transform .2s; }
+  .plan-row:hover { border-color: #d5cbb8; transform: translateY(-1px); }
+  .plan-row .card-emoji { width: 40px; height: 40px; font-size: 1.15rem; border-radius: 10px; }
+  .plan-row .pr-main { flex: 1; min-width: 0; }
+  .plan-row .pr-main b { display: block; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .plan-row .pr-main span { font-size: .8rem; color: var(--muted); }
+  .pr-tag { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 980px; background: var(--green-soft); color: var(--green); white-space: nowrap; }
+  .pr-tag.host { background: var(--accent-soft); color: var(--accent); }
+  .plans-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; }
+  .cancel-note { background: #F7E9E3; border: 1px solid #E8C4B4; color: #8A3A20; border-radius: 12px; padding: 10px 14px; font-size: .85rem; margin-bottom: 10px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .cancel-note button { background: none; border: none; color: #8A3A20; font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
 </style>
 </head>
 <body>
@@ -352,26 +489,34 @@
     <a href="#how">How it works</a>
     <a href="#discover">Discover</a>
     <a href="#random">Surprise me</a>
+    <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
   </div>
-  <div class="nav-actions" id="navActions">
-    <!-- filled by renderNav() -->
-  </div>
+  <div class="nav-actions" id="navActions"></div>
+  <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
 </nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#how" onclick="toggleMenu(false)">How it works</a>
+  <a href="#discover" onclick="toggleMenu(false)">Discover</a>
+  <a href="#random" onclick="toggleMenu(false)">Surprise me</a>
+  <a href="#faq" onclick="toggleMenu(false)">FAQ</a>
+  <a href="#contact" onclick="toggleMenu(false)">Contact</a>
+</div>
 
 <!-- HERO -->
 <header class="hero" id="top">
-  <div class="hero-badge">People near you are making plans right now</div>
-  <h1>Bored in the city?<br><span class="soft">Find your people, right now.</span></h1>
+  <div class="hero-badge"><span class="pulse-dot"></span> People near you are making plans right now</div>
+  <h1>Feeling bored now?<br><span class="soft">Find your people, right away go..</span></h1>
   <p class="sub">Spontano links you with people who want to hang out or do something random — today. Post a plan or join one: coffee, a walk, board games, a gallery, whatever. No endless chats, just meetups.</p>
   <div class="hero-ctas">
     <button class="btn btn-primary btn-lg" onclick="scrollToDiscover()">Browse hangouts</button>
     <button class="btn btn-ghost btn-lg" onclick="surpriseMe()">Surprise me</button>
   </div>
+  <div class="ticker" id="ticker"></div>
   <div class="hero-stats">
-    <div class="stat"><b id="statHangouts">–</b>open hangouts</div>
-    <div class="stat"><b id="statPeople">–</b>people in</div>
-    <div class="stat"><b id="statToday">–</b>happening today</div>
+    <div class="stat"><b id="statHangouts">0</b>open hangouts</div>
+    <div class="stat"><b id="statPeople">0</b>people in</div>
+    <div class="stat"><b id="statToday">0</b>happening today</div>
   </div>
 </header>
 
@@ -395,7 +540,7 @@
       </div>
       <div class="step reveal">
         <div class="num">3</div>
-        <h3>Join & meet up</h3>
+        <h3>Join &amp; meet up</h3>
         <p>Tap join, say hi in the hangout chat, and show up. That's it — the whole point is meeting in real life.</p>
       </div>
     </div>
@@ -416,6 +561,11 @@
         <input id="searchInput" type="text" placeholder="Search plans, places, people…" oninput="renderCards()">
       </div>
       <div class="select-wrap">
+        <select id="cityFilter" onchange="renderCards()">
+          <option value="all">All cities</option>
+        </select>
+      </div>
+      <div class="select-wrap">
         <select id="whenFilter" onchange="renderCards()">
           <option value="all">Any time</option>
           <option value="today">Today</option>
@@ -433,7 +583,7 @@
     </div>
 
     <div class="cat-chips" id="catChips"></div>
-    <div class="cards" id="cards"><div class="empty" style="grid-column:1/-1"><p>Loading hangouts…</p></div></div>
+    <div class="cards" id="cards"></div>
   </div>
 </section>
 
@@ -442,10 +592,28 @@
   <div class="container">
     <div class="random-banner reveal">
       <div>
-        <h2>Can't decide? Let fate pick.</h2>
+        <h2>Can't decide? <em>Let fate pick.</em></h2>
         <p>One tap and we throw you into the hangout that best fits your interests — or something completely random if you're feeling brave.</p>
       </div>
       <button class="btn btn-primary btn-lg" onclick="surpriseMe()">Surprise me</button>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2>Good questions</h2>
+      <p>Everything people usually want to know before their first hangout.</p>
+    </div>
+    <div class="faq-list reveal">
+      <details class="faq-item"><summary>Is Spontano free?</summary><p>Yes — posting and joining hangouts is completely free.</p></details>
+      <details class="faq-item"><summary>How does matching work?</summary><p>You pick interests in your profile. Every hangout is scored against them, so the plans most like you rise to the top. "Surprise me" adds a bit of chance.</p></details>
+      <details class="faq-item"><summary>Is it safe to meet strangers?</summary><p>Always meet in public places, tell a friend where you're going, and trust your gut. Read our <a href="safety.html">safety guidelines</a> before your first meetup.</p></details>
+      <details class="faq-item"><summary>Which cities does it work in?</summary><p>Anywhere — every hangout is tagged with a city, and you can filter the feed to yours. The more people post in your city, the livelier it gets.</p></details>
+      <details class="faq-item"><summary>What if nobody joins my hangout?</summary><p>It happens — post it anyway. Plans with a clear time, place and vibe get the most joins. You can edit or cancel any time.</p></details>
+      <details class="faq-item"><summary>Can I bring a friend?</summary><p>Sure — open the hangout and tap "Share" to send them the link so they can grab a spot themselves.</p></details>
     </div>
   </div>
 </section>
@@ -457,7 +625,7 @@
       <h2>Get in touch</h2>
       <p>Questions, ideas, or something not working? Send us a message — we read everything.</p>
     </div>
-    <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:34px" class="reveal">
+    <div style="max-width:560px;margin:0 auto;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid rgba(233,225,210,.6);padding:34px" class="reveal">
       <div class="field-row">
         <div class="field">
           <label>Your name</label>
@@ -477,9 +645,33 @@
   </div>
 </section>
 
-<footer>
-  <div><b>Spontano</b> — meet your city.</div>
-  <div>Made for people who say "yes" · <a href="#contact" style="color:var(--muted)">Contact</a> · <span id="year"></span></div>
+<footer style="display:block">
+  <div class="footer-grid">
+    <div>
+      <div class="logo" style="margin-bottom:10px"><span class="logo-mark">S</span> Spontano</div>
+      <p style="max-width:260px;font-size:.86rem">Meet your city. Post a plan, find a match, show up.</p>
+    </div>
+    <div>
+      <h4>Product</h4>
+      <a href="#how">How it works</a>
+      <a href="#discover">Discover</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div>
+      <h4>Trust</h4>
+      <a href="safety.html">Safety guidelines</a>
+      <a href="privacy.html">Privacy policy</a>
+      <a href="terms.html">Terms of use</a>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <a href="#contact">Send a message</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="year"></span> Spontano</span>
+    <span>Made for people who say "yes"</span>
+  </div>
 </footer>
 
 <!-- ===== MODALS ===== -->
@@ -503,6 +695,7 @@
     <div class="auth-note" id="authToggleNote">
       New here? <button class="link-btn" onclick="setAuthMode('signup')">Create an account</button>
     </div>
+    <div class="auth-note"><button class="link-btn" style="color:var(--muted)" onclick="forgotPass()">Forgot password?</button></div>
   </div>
 </div>
 
@@ -534,7 +727,7 @@
 <div class="modal-overlay" id="createModal">
   <div class="modal">
     <div class="modal-head">
-      <h2>Post a hangout</h2>
+      <h2 id="crHead">Post a hangout</h2>
       <button class="close-x" onclick="closeModal('createModal')">✕</button>
     </div>
     <div class="field">
@@ -568,11 +761,42 @@
         <input id="crWhen" type="datetime-local">
       </div>
       <div class="field">
-        <label>Where (meeting point)</label>
-        <input id="crWhere" type="text" maxlength="48" placeholder="e.g. Central Station, main hall">
+        <label>City</label>
+        <input id="crCity" type="text" maxlength="32" list="cityList" placeholder="e.g. Amsterdam">
+        <datalist id="cityList"></datalist>
       </div>
     </div>
+    <div class="field">
+      <label>Where (meeting point)</label>
+      <input id="crWhere" type="text" maxlength="48" placeholder="e.g. Central Station, main hall">
+    </div>
     <button class="btn btn-primary" style="width:100%; justify-content:center" id="crSubmit" onclick="createHangout()">Post it</button>
+  </div>
+</div>
+
+<!-- My plans modal -->
+<div class="modal-overlay" id="plansModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>My plans</h2>
+      <button class="close-x" onclick="closeModal('plansModal')">✕</button>
+    </div>
+    <div id="plansBody"></div>
+  </div>
+</div>
+
+<!-- Reset password modal -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <h2>Set a new password</h2>
+      <button class="close-x" onclick="closeModal('resetModal')">✕</button>
+    </div>
+    <div class="field">
+      <label>New password</label>
+      <input id="resetPass" type="password" placeholder="At least 6 characters" onkeydown="if(event.key==='Enter')saveNewPass()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveNewPass()">Save password</button>
   </div>
 </div>
 
@@ -602,27 +826,31 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ============ static data ============ */
 const CATS = [
-  { id: 'coffee',  name: 'Coffee & chat', emoji: '☕' },
-  { id: 'food',    name: 'Food & drinks', emoji: '🍜' },
-  { id: 'outdoor', name: 'Outdoors',      emoji: '🌳' },
-  { id: 'sport',   name: 'Sports',        emoji: '⚽' },
-  { id: 'games',   name: 'Games',         emoji: '🎲' },
-  { id: 'culture', name: 'Art & culture', emoji: '🎨' },
-  { id: 'music',   name: 'Music & night', emoji: '🎶' },
-  { id: 'random',  name: 'Totally random',emoji: '🌀' },
+  { id: 'coffee',  name: 'Coffee & chat', emoji: '☕', color: '#8C5A32' },
+  { id: 'food',    name: 'Food & drinks', emoji: '🍜', color: '#C24E2A' },
+  { id: 'outdoor', name: 'Outdoors',      emoji: '🌳', color: '#2E6B4F' },
+  { id: 'sport',   name: 'Sports',        emoji: '⚽', color: '#3B6C8F' },
+  { id: 'games',   name: 'Games',         emoji: '🎲', color: '#7B5AA0' },
+  { id: 'culture', name: 'Art & culture', emoji: '🎨', color: '#A64D79' },
+  { id: 'music',   name: 'Music & night', emoji: '🎶', color: '#4A4358' },
+  { id: 'random',  name: 'Totally random',emoji: '🌀', color: '#6E7A3A' },
 ];
 const AVATARS = ['🦊','🐼','🦁','🐸','🐙','🦉','🐧','🦄','🐯','🐨','🦋','🐳'];
 
 /* ============ app state ============ */
-let session = null;      // Supabase auth session
-let myProfile = null;    // my row in profiles
-let hangouts = [];       // loaded hangouts with host + attendees
+let session = null;
+let myProfile = null;
+let hangouts = [];
 let activeCat = 'all';
 let selAvatar = AVATARS[0];
 let selInterests = [];
 let authMode = 'signin';
 let chatTimer = null;
 let afterAuthAction = null;
+let firstLoad = true;
+let lastChatJSON = '';
+let openChatId = null;
+let editingId = null;
 
 /* ============ helpers ============ */
 const $ = id => document.getElementById(id);
@@ -634,7 +862,12 @@ function isMine(h) { return uid() && h.host_id === uid(); }
 function peopleIn(h) { return 1 + h.attendees.length; }
 function spotsLeft(h) { return h.spots >= 999 ? Infinity : h.spots - peopleIn(h); }
 
+function minsUntil(iso) { return Math.round((new Date(iso) - new Date()) / 60000); }
+
 function fmtWhen(iso) {
+  const mins = minsUntil(iso);
+  if (mins >= 0 && mins < 60) return `Starting in ${mins <= 1 ? 'a minute' : mins + ' min'}`;
+  if (mins >= 60 && mins < 110) return `Starting in about an hour`;
   const d = new Date(iso), now = new Date();
   const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const midnight = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
@@ -643,6 +876,7 @@ function fmtWhen(iso) {
   if (dayDiff === 1) return `Tomorrow · ${time}`;
   return d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + time;
 }
+function isSoon(iso) { const m = minsUntil(iso); return m >= 0 && m < 110; }
 function dayBucket(iso) {
   const d = new Date(iso), now = new Date();
   const midnight = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
@@ -651,6 +885,15 @@ function dayBucket(iso) {
   if (diff === 1) return 'tomorrow';
   if (diff <= 7) return 'week';
   return 'later';
+}
+function agoText(iso) {
+  const mins = Math.max(0, Math.round((new Date() - new Date(iso)) / 60000));
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + ' min ago';
+  const h = Math.round(mins / 60);
+  if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+  const d = Math.round(h / 24);
+  return d + (d === 1 ? ' day ago' : ' days ago');
 }
 
 function matchScore(h) {
@@ -672,11 +915,73 @@ function toast(msg) {
 function openModal(id) { $(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeModal(id) {
   $(id).classList.remove('open'); document.body.style.overflow = '';
-  if (id === 'detailModal' && chatTimer) { clearInterval(chatTimer); chatTimer = null; }
+  if (id === 'detailModal') {
+    if (chatTimer) { clearInterval(chatTimer); chatTimer = null; }
+    openChatId = null; lastChatJSON = '';
+  }
 }
 document.querySelectorAll('.modal-overlay').forEach(ov => {
   ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); });
 });
+
+/* ============ confetti ============ */
+const CONF_COLORS = ['#C24E2A', '#2E6B4F', '#E8B84A', '#3B6C8F', '#A64D79'];
+function confetti(x, y) {
+  for (let i = 0; i < 22; i++) {
+    const b = document.createElement('div');
+    b.className = 'confetti-bit';
+    const ang = Math.random() * Math.PI * 2, dist = 60 + Math.random() * 120;
+    b.style.left = x + 'px'; b.style.top = y + 'px';
+    b.style.background = CONF_COLORS[i % CONF_COLORS.length];
+    b.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    b.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
+    b.style.setProperty('--dy', (Math.sin(ang) * dist + 90) + 'px');
+    b.style.setProperty('--rot', (Math.random() * 540 - 270) + 'deg');
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 1100);
+  }
+}
+
+/* ============ count-up stats ============ */
+function countUp(el, target) {
+  const from = parseInt(el.dataset.val || '0', 10);
+  if (from === target) { el.textContent = target; return; }
+  el.dataset.val = target;
+  const t0 = performance.now(), dur = 900;
+  function tick(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (target - from) * eased);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ============ activity ticker ============ */
+let tickerItems = [], tickerIdx = 0, tickerTimer = null;
+function buildTicker() {
+  tickerItems = [];
+  const recent = [...hangouts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+  recent.forEach(h => {
+    tickerItems.push(`<b>${esc(h.host?.name || 'Someone')}</b> posted “${esc(h.title)}” · ${agoText(h.created_at)}`);
+    if (h.attendees.length) {
+      const a = h.attendees[h.attendees.length - 1];
+      tickerItems.push(`<b>${esc(a.profile?.name || 'Someone')}</b> joined “${esc(h.title)}”`);
+    }
+  });
+  const soon = hangouts.filter(h => isSoon(h.starts_at));
+  soon.slice(0, 3).forEach(h => tickerItems.push(`“${esc(h.title)}” starts ${fmtWhen(h.starts_at).toLowerCase()}`));
+  if (!tickerItems.length) { $('ticker').innerHTML = ''; return; }
+  if (!tickerTimer) { showTickerItem(); tickerTimer = setInterval(nextTickerItem, 4200); }
+}
+function showTickerItem() {
+  $('ticker').innerHTML = `<span class="ticker-item"><span class="tk-dot"></span><span>${tickerItems[tickerIdx % tickerItems.length]}</span></span>`;
+}
+function nextTickerItem() {
+  const cur = $('ticker').querySelector('.ticker-item');
+  if (cur) cur.classList.add('out');
+  setTimeout(() => { tickerIdx++; showTickerItem(); }, 340);
+}
 
 /* ============ auth ============ */
 function setAuthMode(mode) {
@@ -745,7 +1050,7 @@ function openProfile() {
   $('pfEmojis').innerHTML = AVATARS.map(a =>
     `<button class="emoji-opt ${a === selAvatar ? 'active' : ''}" onclick="pickAvatar('${a}', this)">${a}</button>`).join('');
   $('pfInterests').innerHTML = CATS.map(c =>
-    `<button class="chip ${selInterests.includes(c.id) ? 'active' : ''}" onclick="toggleInterest('${c.id}', this)">${c.emoji} ${esc(c.name)}</button>`).join('');
+    `<button class="chip ${selInterests.includes(c.id) ? 'active' : ''}" onclick="toggleInterest('${c.id}', this)"><span class="c-dot" style="background:${c.color}"></span>${esc(c.name)}</button>`).join('');
   openModal('profileModal');
 }
 function pickAvatar(a, el) {
@@ -787,7 +1092,18 @@ async function loadHangouts() {
     .order('starts_at', { ascending: true });
   if (error) { console.error(error); toast('Could not load hangouts: ' + error.message); return; }
   hangouts = data || [];
+  renderCityOptions();
   renderCards();
+  buildTicker();
+  trackJoined();
+}
+
+function renderCityOptions() {
+  const sel = $('cityFilter');
+  const cur = sel.value;
+  const cities = [...new Set(hangouts.map(h => h.city).filter(Boolean))].sort();
+  sel.innerHTML = `<option value="all">All cities</option>` + cities.map(c => `<option value="${esc(c)}" ${c === cur ? 'selected' : ''}>${esc(c)}</option>`).join('');
+  $('cityList').innerHTML = cities.map(c => `<option value="${esc(c)}">`).join('');
 }
 
 /* ============ rendering ============ */
@@ -795,6 +1111,7 @@ function renderNav() {
   const el = $('navActions');
   if (session && myProfile) {
     el.innerHTML = `
+      <button class="btn btn-ghost" onclick="openPlans()"><span>My<span class="post-label-long"> plans</span></span></button>
       <button class="avatar-chip" onclick="openProfile()">
         <span class="em">${myProfile.avatar}</span><span id="navName">${esc(myProfile.name)}</span>
       </button>
@@ -802,7 +1119,7 @@ function renderNav() {
   } else if (session) {
     el.innerHTML = `
       <button class="avatar-chip" onclick="openProfile()">
-        <span class="em">🙂</span><span id="navName">Finish profile</span>
+        <span class="em">·</span><span id="navName">Finish profile</span>
       </button>
       <button class="btn btn-primary" onclick="openCreate()"><span>+ Post<span class="post-label-long"> a hangout</span></span></button>`;
   } else {
@@ -813,25 +1130,27 @@ function renderNav() {
 }
 
 function renderStats() {
-  $('statHangouts').textContent = hangouts.length;
-  $('statPeople').textContent = hangouts.reduce((n, h) => n + peopleIn(h), 0);
-  $('statToday').textContent = hangouts.filter(h => dayBucket(h.starts_at) === 'today').length;
+  countUp($('statHangouts'), hangouts.length);
+  countUp($('statPeople'), hangouts.reduce((n, h) => n + peopleIn(h), 0));
+  countUp($('statToday'), hangouts.filter(h => dayBucket(h.starts_at) === 'today').length);
 }
 
 function renderChips() {
   const el = $('catChips');
-  const all = [{ id: 'all', name: 'All', emoji: '' }, ...CATS];
+  const all = [{ id: 'all', name: 'All', color: null }, ...CATS];
   el.innerHTML = all.map(c =>
-    `<button class="chip ${activeCat === c.id ? 'active' : ''}" onclick="setCat('${c.id}')">${c.emoji ? c.emoji + ' ' : ''}${esc(c.name)}</button>`
+    `<button class="chip ${activeCat === c.id ? 'active' : ''}" onclick="setCat('${c.id}')">${c.color ? `<span class="c-dot" style="background:${c.color}"></span>` : ''}${esc(c.name)}</button>`
   ).join('');
 }
-function setCat(id) { activeCat = id; renderChips(); renderCards(); }
+function setCat(id) { activeCat = id; renderChips(); renderCards(true); }
 
 function visibleHangouts() {
   const q = $('searchInput').value.trim().toLowerCase();
   const when = $('whenFilter').value;
   let hs = [...hangouts];
   if (activeCat !== 'all') hs = hs.filter(h => h.category === activeCat);
+  const city = $('cityFilter').value;
+  if (city !== 'all') hs = hs.filter(h => h.city === city);
   if (when !== 'all') hs = hs.filter(h => when === 'week'
     ? ['today', 'tomorrow', 'week'].includes(dayBucket(h.starts_at))
     : dayBucket(h.starts_at) === when);
@@ -843,13 +1162,19 @@ function visibleHangouts() {
   return hs;
 }
 
-function cardHTML(h) {
+function whenHTML(h) {
+  return isSoon(h.starts_at)
+    ? `<span class="when-soon" data-when="${h.starts_at}"><span class="pulse-dot" style="width:7px;height:7px"></span>${fmtWhen(h.starts_at)}</span>`
+    : `<span data-when="${h.starts_at}">${fmtWhen(h.starts_at)}</span>`;
+}
+
+function cardHTML(h, i) {
   const cat = catOf(h.category);
   const score = matchScore(h);
   const left = spotsLeft(h);
   const full = left <= 0;
   return `
-  <article class="card" onclick="openDetail('${h.id}')">
+  <article class="card card-in" style="--cat-color:${cat.color};animation-delay:${Math.min(i * 55, 500)}ms" onclick="openDetail('${h.id}')">
     <div class="card-top">
       <div class="card-emoji">${h.emoji || cat.emoji}</div>
       ${score ? `<span class="match-badge">${score}% match</span>` : ''}
@@ -857,37 +1182,71 @@ function cardHTML(h) {
     <h3>${esc(h.title)}</h3>
     <p class="desc">${esc(h.description)}</p>
     <div class="card-meta">
-      <span>${fmtWhen(h.starts_at)}</span>
-      <span>${esc(h.location)}</span>
-      <span>${esc(cat.name)}</span>
+      ${whenHTML(h)}
+      <span>${esc(h.location)}${h.city ? ' · ' + esc(h.city) : ''}</span>
+      <span style="color:${cat.color};font-weight:600">${esc(cat.name)}</span>
     </div>
     <div class="card-foot">
-      <div class="host"><span class="em">${h.host?.avatar || '🙂'}</span> ${esc(h.host?.name || 'Someone')}${isMine(h) ? ' (you)' : ''}</div>
+      <div class="host"><span class="em">${h.host?.avatar || '·'}</span> ${esc(h.host?.name || 'Someone')}${isMine(h) ? ' (you)' : ''}</div>
       ${isJoined(h) ? '<span class="joined-tag">✓ You\'re in</span>'
         : `<span class="spots ${full ? 'full' : ''}">${full ? 'Full' : (left === Infinity ? 'Open to all' : left + ' spot' + (left === 1 ? '' : 's') + ' left')}</span>`}
     </div>
   </article>`;
 }
 
-function renderCards() {
+function skeletonHTML() {
+  let out = '';
+  for (let i = 0; i < 6; i++) {
+    out += `<div class="skel-card">
+      <div style="display:flex;justify-content:space-between"><div class="sk" style="width:52px;height:52px;border-radius:14px"></div><div class="sk" style="width:80px;height:24px;border-radius:980px"></div></div>
+      <div class="sk" style="width:70%;height:20px"></div>
+      <div class="sk" style="width:100%;height:14px"></div>
+      <div class="sk" style="width:55%;height:14px"></div>
+      <div class="sk" style="width:40%;height:14px;margin-top:8px"></div>
+    </div>`;
+  }
+  return out;
+}
+
+function renderCards(animate) {
+  if (firstLoad) return;
   const hs = visibleHangouts();
   $('cards').innerHTML = hs.length
-    ? hs.map(cardHTML).join('')
+    ? hs.map((h, i) => cardHTML(h, animate === false ? 99 : i)).join('')
     : `<div class="empty" style="grid-column:1/-1">
-        <div class="big">🌵</div>
-        <p><b>Nothing here (yet).</b><br>Be the one who starts it — post a hangout and see who shows up.</p>
+        <div class="big">Nothing here — yet.</div>
+        <p>Be the one who starts it. Post a hangout and see who shows up.</p>
         <br><button class="btn btn-primary" onclick="openCreate()">+ Post a hangout</button>
       </div>`;
   renderStats();
 }
 
-/* ============ create ============ */
-function openCreate() {
+/* keep countdown texts ticking */
+setInterval(() => {
+  document.querySelectorAll('[data-when]').forEach(el => {
+    const iso = el.getAttribute('data-when');
+    const label = fmtWhen(iso);
+    const txt = el.querySelector('.pulse-dot') ? el.childNodes[el.childNodes.length - 1] : el.firstChild;
+    if (txt && txt.textContent !== label) txt.textContent = label;
+  });
+}, 30000);
+
+/* ============ create & edit ============ */
+function lastCity() { try { return localStorage.getItem('spontano_city') || ''; } catch (e) { return ''; } }
+function openCreate(editId) {
   if (!requireAuth('create')) return;
   if (!myProfile) { toast('Finish your profile first'); openProfile(); return; }
-  $('crCat').innerHTML = CATS.map(c => `<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
-  const d = new Date(Date.now() + 3 * 3600e3);
-  d.setMinutes(0, 0, 0);
+  editingId = editId || null;
+  const h = editingId ? findHangout(editingId) : null;
+  $('crHead').textContent = h ? 'Edit your hangout' : 'Post a hangout';
+  $('crSubmit').textContent = h ? 'Save changes' : 'Post it';
+  $('crCat').innerHTML = CATS.map(c => `<option value="${c.id}" ${h && h.category === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  $('crTitle').value = h ? h.title : '';
+  $('crDesc').value = h ? h.description : '';
+  $('crWhere').value = h ? h.location : '';
+  $('crCity').value = h ? (h.city || '') : lastCity();
+  $('crSpots').value = h ? String(h.spots) : '4';
+  const d = h ? new Date(h.starts_at) : (() => { const x = new Date(Date.now() + 3 * 3600e3); x.setMinutes(0, 0, 0); return x; })();
   const pad = n => String(n).padStart(2, '0');
   $('crWhen').value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   openModal('createModal');
@@ -895,28 +1254,46 @@ function openCreate() {
 async function createHangout() {
   const title = $('crTitle').value.trim();
   const where = $('crWhere').value.trim();
+  const city = $('crCity').value.trim();
   const when = $('crWhen').value;
   if (!title) { toast('Give your plan a title'); return; }
+  if (!city) { toast('Which city is this in?'); return; }
   if (!where) { toast('Where should people meet you?'); return; }
   if (!when || new Date(when) <= new Date()) { toast('Pick a time in the future'); return; }
   const cat = catOf($('crCat').value);
   $('crSubmit').disabled = true;
-  const { error } = await db.from('hangouts').insert({
-    host_id: uid(),
+  const row = {
     title,
     description: $('crDesc').value.trim() || 'No description — pure mystery.',
     category: cat.id, emoji: cat.emoji,
     starts_at: new Date(when).toISOString(),
     location: where,
     spots: parseInt($('crSpots').value, 10),
-  });
+    city,
+  };
+  let error;
+  if (editingId) {
+    ({ error } = await db.from('hangouts').update(row).eq('id', editingId));
+    if (error && /city/i.test(error.message)) { delete row.city; ({ error } = await db.from('hangouts').update(row).eq('id', editingId)); }
+  } else {
+    row.host_id = uid();
+    ({ error } = await db.from('hangouts').insert(row));
+    if (error && /city/i.test(error.message)) { delete row.city; ({ error } = await db.from('hangouts').insert(row)); }
+  }
   $('crSubmit').disabled = false;
   if (error) { toast(error.message); return; }
+  try { localStorage.setItem('spontano_city', city); } catch (e) {}
+  const wasEdit = !!editingId;
+  editingId = null;
   ['crTitle', 'crDesc', 'crWhere'].forEach(id => $(id).value = '');
   closeModal('createModal');
   await loadHangouts();
-  toast('Posted! Your hangout is live for everyone.');
-  scrollToDiscover();
+  if (wasEdit) { toast('Changes saved.'); }
+  else {
+    confetti(window.innerWidth / 2, window.innerHeight / 3);
+    toast('Posted! Your hangout is live for everyone.');
+    scrollToDiscover();
+  }
 }
 
 /* ============ detail / join / chat ============ */
@@ -933,11 +1310,11 @@ async function openDetail(id) {
   const attendees = [{ user_id: h.host_id, profile: h.host, host: true }, ...h.attendees];
   $('detailBody').innerHTML = `
     <div class="modal-head">
-      <h2 style="font-size:.95rem;color:var(--muted);font-weight:500">${cat.emoji} ${esc(cat.name)}</h2>
+      <h2 style="font-size:.9rem;font-family:var(--font-ui);color:${cat.color};font-weight:700;display:flex;align-items:center;gap:8px"><span class="c-dot" style="width:9px;height:9px;border-radius:50%;background:${cat.color};display:inline-block"></span>${esc(cat.name)}</h2>
       <button class="close-x" onclick="closeModal('detailModal')">✕</button>
     </div>
     <div class="detail-hero">
-      <div class="card-emoji">${h.emoji || cat.emoji}</div>
+      <div class="card-emoji" style="--cat-color:${cat.color}">${h.emoji || cat.emoji}</div>
       <div>
         <h3 style="font-size:1.3rem;font-weight:700">${esc(h.title)}</h3>
         ${score ? `<span class="match-badge" style="margin-top:6px;display:inline-block">${score}% match for you</span>` : ''}
@@ -945,18 +1322,19 @@ async function openDetail(id) {
     </div>
     <p style="color:var(--muted);font-size:.94rem">${esc(h.description)}</p>
     <div class="detail-meta">
-      <div class="dm"><b>When</b>${fmtWhen(h.starts_at)}</div>
-      <div class="dm"><b>Where</b>${esc(h.location)}</div>
-      <div class="dm"><b>Host</b>${h.host?.avatar || '🙂'} ${esc(h.host?.name || 'Someone')}${mine ? ' (you)' : ''}</div>
+      <div class="dm"><b>When</b><span data-when="${h.starts_at}">${fmtWhen(h.starts_at)}</span></div>
+      <div class="dm"><b>Where</b>${esc(h.location)}${h.city ? ' · ' + esc(h.city) : ''}</div>
+      <div class="dm"><b>Host</b>${h.host?.avatar || ''} ${esc(h.host?.name || 'Someone')}${mine ? ' (you)' : ''}</div>
       <div class="dm"><b>Spots</b>${peopleIn(h)} in · ${left === Infinity ? 'no limit' : (left <= 0 ? 'full' : left + ' left')}</div>
     </div>
     <b style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Who's in</b>
     <div class="attendees">
-      ${attendees.map(a => `<span class="attendee"><span class="em">${a.profile?.avatar || '🙂'}</span>${esc(a.profile?.name || 'Someone')}${a.host ? ' · host' : ''}</span>`).join('')}
+      ${attendees.map((a, i) => `<span class="attendee" style="animation-delay:${i * 60}ms"><span class="em">${a.profile?.avatar || '·'}</span>${esc(a.profile?.name || 'Someone')}${a.host ? ' · host' : ''}</span>`).join('')}
     </div>
-    ${mine ? `<button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="cancelHangout('${h.id}')">Cancel this hangout</button>`
+    ${mine ? `<div style="display:flex;gap:10px"><button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal('detailModal');openCreate('${h.id}')">Edit</button><button class="btn btn-ghost" style="flex:1;justify-content:center;color:#A03028" onclick="cancelHangout('${h.id}')">Cancel it</button></div>`
       : joined ? `<button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="leaveHangout('${h.id}')">Leave hangout</button>`
-      : `<button class="btn btn-primary" style="width:100%;justify-content:center" ${full ? 'disabled style="width:100%;justify-content:center;opacity:.5;cursor:not-allowed"' : ''} onclick="joinHangout('${h.id}')">${full ? 'This one\'s full' : 'Count me in'}</button>`}
+      : `<button class="btn btn-primary" style="width:100%;justify-content:center${full ? ';opacity:.5;cursor:not-allowed' : ''}" ${full ? 'disabled' : ''} onclick="joinHangout('${h.id}', event)">${full ? 'This one\'s full' : 'Count me in'}</button>`}
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px" onclick="shareHangout('${h.id}')">Share this hangout</button>
     ${(joined || mine) ? `
     <div class="chat-box">
       <b style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Hangout chat</b>
@@ -968,10 +1346,12 @@ async function openDetail(id) {
     </div>` : ''}
   `;
   openModal('detailModal');
+  openChatId = (joined || mine) ? id : null;
+  lastChatJSON = '';
   if (joined || mine) {
     await refreshChat(id);
     if (chatTimer) clearInterval(chatTimer);
-    chatTimer = setInterval(() => refreshChat(id), 6000);
+    chatTimer = setInterval(() => refreshChat(id), 5000);
   }
 }
 
@@ -984,20 +1364,25 @@ async function refreshChat(id) {
     .order('created_at', { ascending: true })
     .limit(100);
   if (error) { box.innerHTML = `<div class="chat-msg" style="color:var(--muted)">${esc(error.message)}</div>`; return; }
+  const json = JSON.stringify(data || []);
+  if (json === lastChatJSON) return; // no flicker: skip identical re-renders
+  const prevCount = lastChatJSON ? (JSON.parse(lastChatJSON) || []).length : 0;
+  lastChatJSON = json;
   const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
   box.innerHTML = (data && data.length)
-    ? data.map(m => `<div class="chat-msg ${m.user_id === uid() ? 'mine' : ''}"><b>${esc(m.profile?.name || 'Someone')}:</b> ${esc(m.body)}</div>`).join('')
-    : '<div class="chat-msg" style="color:var(--muted)">No messages yet — say hi 👋</div>';
+    ? data.map((m, i) => `<div class="chat-msg ${m.user_id === uid() ? 'mine' : ''} ${i >= prevCount ? 'msg-new' : ''}"><b>${esc(m.profile?.name || 'Someone')}:</b> ${esc(m.body)}</div>`).join('')
+    : '<div class="chat-msg" style="color:var(--muted)">No messages yet — say hi</div>';
   if (nearBottom) box.scrollTop = box.scrollHeight;
 }
 
-async function joinHangout(id) {
+async function joinHangout(id, ev) {
   if (!requireAuth()) { closeModal('detailModal'); return; }
   if (!myProfile) { toast('Finish your profile first'); openProfile(); return; }
   const h = findHangout(id);
   if (!h || spotsLeft(h) <= 0) return;
   const { error } = await db.from('attendees').insert({ hangout_id: id, user_id: uid() });
   if (error) { toast(error.message); return; }
+  if (ev) confetti(ev.clientX, ev.clientY);
   await loadHangouts();
   openDetail(id);
   toast(`You're in! See you at ${h.location}.`);
@@ -1027,7 +1412,7 @@ async function sendMsg(id) {
   const box = $('chatMsgs'); if (box) box.scrollTop = box.scrollHeight;
 }
 
-/* ============ surprise me ============ */
+/* ============ surprise me (roulette) ============ */
 function surpriseMe() {
   if (!requireAuth('surprise')) return;
   const open = hangouts.filter(h => !isMine(h) && !isJoined(h) && spotsLeft(h) > 0);
@@ -1035,6 +1420,23 @@ function surpriseMe() {
   const scored = open.map(h => ({ h, s: (matchScore(h) || 50) + Math.random() * 20 }));
   scored.sort((a, b) => b.s - a.s);
   const pick = (Math.random() < 0.75 ? scored[0] : scored[Math.floor(Math.random() * scored.length)]).h;
+
+  // roulette: cycle through candidates before revealing
+  openModal('surpriseModal');
+  const body = $('surpriseBody');
+  let spins = 0;
+  const maxSpins = Math.min(10, open.length * 3);
+  body.innerHTML = `<span class="roulette" id="rlEmoji"></span><div class="roulette-title" id="rlTitle"></div>`;
+  const spinTimer = setInterval(() => {
+    const rnd = open[Math.floor(Math.random() * open.length)];
+    const c = catOf(rnd.category);
+    $('rlEmoji').textContent = rnd.emoji || c.emoji;
+    $('rlTitle').textContent = rnd.title;
+    spins++;
+    if (spins >= maxSpins) { clearInterval(spinTimer); revealPick(pick); }
+  }, 110 + spins * 8);
+}
+function revealPick(pick) {
   const cat = catOf(pick.category);
   const why = myProfile && myProfile.interests && myProfile.interests.includes(pick.category)
     ? `Matched on your love of ${cat.name.toLowerCase()}`
@@ -1042,16 +1444,92 @@ function surpriseMe() {
   $('surpriseBody').innerHTML = `
     <span class="spin-emoji">${pick.emoji || cat.emoji}</span>
     <h3>${esc(pick.title)}</h3>
-    <p style="color:var(--muted);font-size:.92rem">${fmtWhen(pick.starts_at)} · ${esc(pick.location)} · ${pick.host?.avatar || '🙂'} ${esc(pick.host?.name || 'Someone')}</p>
+    <p style="color:var(--muted);font-size:.92rem">${fmtWhen(pick.starts_at)} · ${esc(pick.location)} · ${esc(pick.host?.name || 'Someone')}</p>
     <div class="why">${esc(why)}</div><br>
     <button class="btn btn-primary btn-lg" onclick="closeModal('surpriseModal');openDetail('${pick.id}')">Show me this plan</button>
     <br><br>
     <button class="btn btn-ghost" onclick="surpriseMe()">Spin again</button>
   `;
-  openModal('surpriseModal');
 }
 
-function scrollToDiscover() { document.getElementById('discover').scrollIntoView({ behavior: 'smooth' }); }
+function scrollToDiscover() { const el = document.getElementById('discover'); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 60, behavior: 'smooth' }); }
+
+/* ============ share / deep link ============ */
+function shareHangout(id) {
+  const h = findHangout(id);
+  const url = location.origin + location.pathname + '?h=' + id;
+  if (navigator.share) { navigator.share({ title: h ? h.title : 'Spontano hangout', url }).catch(() => {}); return; }
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(
+    () => toast('Link copied — send it to a friend!'),
+    () => prompt('Copy this link:', url)
+  );
+}
+
+/* ============ my plans & cancel notices ============ */
+function getCancelled() { try { return JSON.parse(localStorage.getItem('spontano_cancelled') || '[]'); } catch (e) { return []; } }
+function dismissCancel(id) {
+  try { localStorage.setItem('spontano_cancelled', JSON.stringify(getCancelled().filter(c => c.id !== id))); } catch (e) {}
+  renderPlans();
+}
+function trackJoined() {
+  if (!uid()) return;
+  let stored = [];
+  try { stored = JSON.parse(localStorage.getItem('spontano_joined') || '[]'); } catch (e) {}
+  const nowIds = new Set(hangouts.map(h => h.id));
+  const gone = stored.filter(s => !nowIds.has(s.id) && new Date(s.starts_at) > new Date());
+  if (gone.length) {
+    const canc = getCancelled();
+    gone.forEach(g => { if (!canc.some(c => c.id === g.id)) { canc.push(g); toast(`“${g.title}” was cancelled by the host.`); } });
+    try { localStorage.setItem('spontano_cancelled', JSON.stringify(canc.slice(-10))); } catch (e) {}
+  }
+  const current = hangouts.filter(h => isJoined(h) && !isMine(h)).map(h => ({ id: h.id, title: h.title, starts_at: h.starts_at }));
+  try { localStorage.setItem('spontano_joined', JSON.stringify(current)); } catch (e) {}
+}
+function openPlans() {
+  if (!requireAuth()) return;
+  renderPlans();
+  openModal('plansModal');
+}
+function renderPlans() {
+  const mine = hangouts.filter(h => isMine(h));
+  const joined = hangouts.filter(h => isJoined(h) && !isMine(h));
+  let out = '';
+  getCancelled().forEach(c => {
+    out += `<div class="cancel-note"><span>“${esc(c.title)}” was cancelled by the host.</span><button onclick="dismissCancel('${c.id}')">Dismiss</button></div>`;
+  });
+  const row = (h, tag) => { const cat = catOf(h.category); return `<div class="plan-row" onclick="closeModal('plansModal');openDetail('${h.id}')">
+    <div class="card-emoji" style="--cat-color:${cat.color}">${h.emoji || cat.emoji}</div>
+    <div class="pr-main"><b>${esc(h.title)}</b><span>${fmtWhen(h.starts_at)} · ${esc(h.location)}${h.city ? ' · ' + esc(h.city) : ''}</span></div>
+    <span class="pr-tag ${tag === 'Hosting' ? 'host' : ''}">${tag}</span></div>`; };
+  if (mine.length) out += `<div class="plans-label">Hosting</div><div style="margin:10px 0 18px">${mine.map(h => row(h, 'Hosting')).join('')}</div>`;
+  if (joined.length) out += `<div class="plans-label">Joined</div><div style="margin:10px 0">${joined.map(h => row(h, 'Going')).join('')}</div>`;
+  if (!out) out = `<div class="empty"><div class="big">No plans yet.</div><p>Join a hangout or post your own — your upcoming plans will live here.</p></div>`;
+  $('plansBody').innerHTML = out;
+}
+
+/* ============ forgot / reset password ============ */
+async function forgotPass() {
+  const email = $('authEmail').value.trim();
+  if (!email || !email.includes('@')) { toast('Type your email above first, then tap "Forgot password".'); return; }
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  toast(error ? error.message : 'Reset link sent — check your email.');
+}
+async function saveNewPass() {
+  const p = $('resetPass').value;
+  if (p.length < 6) { toast('Password needs at least 6 characters'); return; }
+  const { error } = await db.auth.updateUser({ password: p });
+  if (error) { toast(error.message); return; }
+  $('resetPass').value = '';
+  closeModal('resetModal');
+  toast('Password updated — you are signed in.');
+}
+
+/* ============ mobile menu ============ */
+function toggleMenu(force) {
+  const m = $('mobileMenu');
+  const open = force === undefined ? !m.classList.contains('open') : force;
+  m.classList.toggle('open', open);
+}
 
 /* ============ contact form ============ */
 async function sendContact() {
@@ -1062,9 +1540,18 @@ async function sendContact() {
   if (!email || !email.includes('@')) { toast('Enter a valid email so we can reply'); return; }
   if (!msg) { toast('Write a message first'); return; }
   $('ctSubmit').disabled = true;
-  const { error } = await db.from('contact_messages').insert({ name, email, message: msg });
+  const [dbRes, mailRes] = await Promise.allSettled([
+    db.from('contact_messages').insert({ name, email, message: msg }),
+    fetch('https://formspree.io/f/xrewyddk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, message: msg }),
+    }),
+  ]);
   $('ctSubmit').disabled = false;
-  if (error) { toast('Could not send: ' + error.message); return; }
+  const dbOk = dbRes.status === 'fulfilled' && !dbRes.value.error;
+  const mailOk = mailRes.status === 'fulfilled' && mailRes.value.ok;
+  if (!dbOk && !mailOk) { toast('Could not send — please try again.'); return; }
   ['ctName', 'ctEmail', 'ctMsg'].forEach(id => $(id).value = '');
   toast('Message sent — thank you! We\'ll get back to you.');
 }
@@ -1075,24 +1562,50 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: 0.12 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
+/* ============ realtime ============ */
+let reloadDebounce = null;
+function subscribeRealtime() {
+  db.channel('live-hangouts')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'hangouts' }, () => queueReload())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'attendees' }, () => queueReload())
+    .subscribe();
+  db.channel('live-messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+      if (openChatId && payload.new && payload.new.hangout_id === openChatId) refreshChat(openChatId);
+    })
+    .subscribe();
+}
+function queueReload() {
+  clearTimeout(reloadDebounce);
+  reloadDebounce = setTimeout(loadHangouts, 600);
+}
+
 /* ============ init ============ */
 $('year').textContent = new Date().getFullYear();
 renderChips();
 renderNav();
+$('cards').innerHTML = skeletonHTML();
 
 (async () => {
   const { data } = await db.auth.getSession();
   session = data.session;
   if (session) await loadMyProfile();
   renderNav();
+  firstLoad = false;
   await loadHangouts();
+  subscribeRealtime();
+
+  // deep link: ?h=<id> opens that hangout
+  const deepId = new URLSearchParams(location.search).get('h');
+  if (deepId && findHangout(deepId)) openDetail(deepId);
 
   db.auth.onAuthStateChange(async (event, s) => {
+    if (event === 'PASSWORD_RECOVERY') { openModal('resetModal'); return; }
     const wasSignedIn = !!session;
     session = s;
     await loadMyProfile();
     renderNav();
-    renderCards();
+    renderCards(false);
     if (s && !wasSignedIn) {
       if (!myProfile) {
         toast('Welcome! Set up your profile to get going.');
@@ -1104,8 +1617,8 @@ renderNav();
     }
   });
 
-  // refresh the feed every 30s so new posts from others appear
-  setInterval(loadHangouts, 30000);
+  // slow polling as a safety net behind realtime
+  setInterval(loadHangouts, 60000);
 })();
 </script>
 </body>
